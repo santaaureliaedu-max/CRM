@@ -1,0 +1,1539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Headmaster — Santa Aurelia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1B2A4A; --ink-soft:#33456b; --paper:#F6F4EF; --paper-raised:#fff;
+    --brass:#B08D57; --brass-soft:#e8dcc4; --green:#2F5D50; --green-bg:#e7efec;
+    --rust:#B5502D; --rust-bg:#f6e6df; --slate:#6B7280; --hairline:#d9d4c7;
+    --radius:3px;
+    --serif:'Fraunces',Georgia,serif; --sans:'Inter',-apple-system,sans-serif; --mono:'IBM Plex Mono',monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-font-smoothing:antialiased}
+  body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.5}
+  a{color:inherit}
+  button{font-family:var(--sans);cursor:pointer}
+
+  #login{position:fixed;inset:0;background:var(--ink);display:flex;align-items:center;justify-content:center;z-index:50}
+  #login .card{background:var(--paper-raised);border-radius:var(--radius);padding:36px 34px;width:340px}
+  #login .crest-mark{width:38px;height:38px;border:1.5px solid var(--brass);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-weight:700;color:var(--brass);margin-bottom:18px}
+  #login h1{font-family:var(--serif);font-size:22px;font-weight:600;margin-bottom:4px}
+  #login p{color:var(--slate);font-size:13px;margin-bottom:22px}
+  #login label{display:block;font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--slate);margin:14px 0 5px}
+  #login input{width:100%;padding:10px 12px;border:1px solid var(--hairline);border-radius:var(--radius);font-size:14px;font-family:var(--sans)}
+  #login button{width:100%;margin-top:22px;padding:11px;background:var(--ink);color:#fff;border:none;border-radius:var(--radius);font-size:14px;font-weight:600}
+  #login button:hover{background:var(--ink-soft)}
+  #login .err{font-size:12px;margin-top:12px;min-height:16px}
+
+  .shell{display:grid;grid-template-columns:220px 1fr;min-height:100vh}
+  .sidebar{background:var(--ink);color:#E9E4D8;padding:24px 0;display:flex;flex-direction:column}
+  .crest{display:flex;align-items:center;gap:10px;padding:0 20px 22px;border-bottom:1px solid rgba(233,228,216,.15);margin-bottom:18px}
+  .crest-mark{width:30px;height:30px;border:1.5px solid var(--brass);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-weight:700;font-size:14px;color:var(--brass);flex-shrink:0}
+  .crest-text{font-family:var(--serif);font-size:15px;font-weight:600;line-height:1.2}
+  .crest-text span{display:block;font-family:var(--mono);font-size:10px;font-weight:400;letter-spacing:.08em;color:rgba(233,228,216,.55);margin-top:2px;text-transform:uppercase}
+  nav.tabs{display:flex;flex-direction:column;gap:2px;padding:0 12px}
+  nav.tabs button{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--radius);text-decoration:none;font-size:13px;font-weight:500;color:rgba(233,228,216,.75);border-left:2px solid transparent;background:none;border-top:none;border-right:none;border-bottom:none;width:100%;text-align:left}
+  nav.tabs button .num{font-family:var(--mono);font-size:10px;color:rgba(233,228,216,.4);width:16px}
+  nav.tabs button:hover{background:rgba(233,228,216,.06);color:#fff}
+  nav.tabs button.active{background:rgba(233,228,216,.09);color:#fff;border-left-color:var(--brass)}
+  nav.tabs button.active .num{color:var(--brass)}
+  .sidebar-foot{margin-top:auto;padding:16px 20px 4px;border-top:1px solid rgba(233,228,216,.15);font-size:12px;color:rgba(233,228,216,.5)}
+  .sidebar-foot strong{display:block;color:rgba(233,228,216,.85);font-weight:600}
+  .sidebar-foot a{display:inline-block;margin-top:8px;color:var(--brass);text-decoration:underline;font-size:11px;cursor:pointer}
+
+  main{padding:28px 36px 60px;max-width:1180px}
+  .masthead{display:flex;justify-content:space-between;align-items:flex-end;padding-bottom:18px;margin-bottom:24px;border-bottom:2px solid var(--ink)}
+  .masthead h1{font-family:var(--serif);font-weight:600;font-size:26px;letter-spacing:-.01em}
+  .masthead p{color:var(--slate);font-size:13px;margin-top:4px}
+  .term-tag{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);background:var(--brass-soft);border:1px solid var(--brass);padding:5px 10px;border-radius:var(--radius)}
+
+  .kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--hairline);border:1px solid var(--hairline);margin-bottom:32px}
+  .kpi{background:var(--paper-raised);padding:18px 20px}
+  .kpi-label{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--slate);margin-bottom:8px}
+  .kpi-value{font-family:var(--serif);font-size:30px;font-weight:600;line-height:1}
+  .kpi-value small{font-family:var(--mono);font-size:13px;font-weight:400;color:var(--slate);margin-left:4px}
+  .kpi-delta{font-family:var(--mono);font-size:11px;margin-top:8px;color:var(--slate)}
+  .kpi-delta.up{color:var(--green)} .kpi-delta.down{color:var(--rust)}
+
+  .section-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px;margin-top:8px}
+  .section-head h2{font-family:var(--serif);font-size:17px;font-weight:600}
+  .grid-2{display:grid;grid-template-columns:1.2fr 1fr;gap:28px;margin-bottom:32px;align-items:start}
+
+  .ledger,.panel{background:var(--paper-raised);border:1px solid var(--hairline)}
+  .ledger-row{display:grid;grid-template-columns:1fr auto 120px;gap:14px;align-items:center;padding:12px 16px;border-bottom:1px solid var(--hairline)}
+  .ledger-row:last-child{border-bottom:none}
+  .ledger-row .cls-name{font-weight:600;font-size:13px}
+  .ledger-row .cls-teacher{font-size:12px;color:var(--slate);margin-top:1px}
+  .ledger-row .cls-count{font-family:var(--mono);font-size:13px;text-align:right;white-space:nowrap}
+  .bar-track{height:6px;background:var(--brass-soft);border-radius:3px;overflow:hidden}
+  .bar-fill{height:100%;background:var(--brass)}
+  .panel-item{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:13px 16px;border-bottom:1px solid var(--hairline)}
+  .panel-item:last-child{border-bottom:none}
+  .panel-item .who{font-weight:600;font-size:13px}
+  .panel-item .meta{font-size:12px;color:var(--slate);margin-top:2px}
+  .panel-item .amount{font-family:var(--mono);font-size:13px;font-weight:600;white-space:nowrap}
+  .empty{padding:20px 16px;color:var(--slate);font-size:13px;text-align:center}
+
+  .stamp{display:inline-block;font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:3px 9px;border-radius:999px;border:1.5px dashed currentColor;transform:rotate(-3deg);white-space:nowrap}
+  .stamp.paid{color:var(--green);background:var(--green-bg)}
+  .stamp.overdue{color:var(--rust);background:var(--rust-bg)}
+  .stamp.pending{color:var(--brass);background:var(--brass-soft)}
+  .incident-cat{font-size:11px;color:var(--ink-soft);background:#eceade;padding:2px 7px;border-radius:2px;margin-right:6px}
+
+  /* buttons */
+  .btn{padding:8px 16px;border:none;border-radius:var(--radius);font-size:13px;font-weight:600}
+  .btn-primary{background:var(--ink);color:#fff}
+  .btn-primary:hover{background:var(--ink-soft)}
+  .btn-ghost{background:none;border:1px solid var(--hairline);color:var(--ink)}
+  .btn-ghost:hover{background:var(--brass-soft)}
+
+  /* tables */
+  table{width:100%;border-collapse:collapse;background:var(--paper-raised);border:1px solid var(--hairline)}
+  th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--slate);padding:10px 14px;border-bottom:1px solid var(--hairline);font-weight:600}
+  td{padding:11px 14px;border-bottom:1px solid var(--hairline);font-size:13px;vertical-align:middle}
+  tr:last-child td{border-bottom:none}
+  td .sub{color:var(--slate);font-size:12px}
+  select.inline{font-family:var(--sans);font-size:13px;padding:5px 8px;border:1px solid var(--hairline);border-radius:var(--radius);background:#fff;max-width:160px}
+
+  /* modal */
+  .modal-bg{position:fixed;inset:0;background:rgba(27,42,74,.55);display:none;align-items:center;justify-content:center;z-index:40;padding:20px}
+  .modal-bg.open{display:flex}
+  .modal{background:var(--paper-raised);border-radius:var(--radius);padding:28px;width:460px;max-width:100%;max-height:90vh;overflow-y:auto}
+  .modal h3{font-family:var(--serif);font-size:19px;font-weight:600;margin-bottom:4px}
+  .modal .modal-sub{color:var(--slate);font-size:13px;margin-bottom:20px}
+  .modal label{display:block;font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--slate);margin:14px 0 5px}
+  .modal input,.modal select,.modal textarea{width:100%;padding:9px 11px;border:1px solid var(--hairline);border-radius:var(--radius);font-size:14px;font-family:var(--sans)}
+  .modal textarea{min-height:60px;resize:vertical}
+  .modal .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:24px}
+  .modal .err{color:var(--rust);font-size:12px;margin-top:10px;min-height:14px}
+  .field-note{font-size:11px;color:var(--slate);margin-top:3px}
+
+  .placeholder{padding:60px 20px;text-align:center;color:var(--slate)}
+  .placeholder h2{font-family:var(--serif);font-size:20px;color:var(--ink);margin-bottom:8px}
+
+  /* Student 360 drawer */
+  .drawer-bg{position:fixed;inset:0;background:rgba(27,42,74,.4);display:none;z-index:45}
+  .drawer-bg.open{display:block}
+  .drawer{position:absolute;top:0;right:0;height:100%;width:460px;max-width:92%;background:var(--paper);box-shadow:-4px 0 24px rgba(0,0,0,.18);overflow-y:auto}
+  .d-head{background:var(--ink);color:#fff;padding:22px 24px;position:relative}
+  .d-head h2{font-family:var(--serif);font-size:22px;font-weight:600}
+  .d-head .d-meta{font-size:13px;opacity:.8;margin-top:3px}
+  .d-close{position:absolute;top:16px;right:18px;background:none;border:none;color:#fff;font-size:24px;cursor:pointer;line-height:1}
+  .d-body{padding:20px 24px 40px}
+  .d-sec{margin-bottom:24px}
+  .d-sec h3{font-family:var(--serif);font-size:15px;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--hairline)}
+  .d-row{display:flex;justify-content:space-between;gap:12px;padding:7px 0;font-size:13px;border-bottom:1px solid var(--hairline)}
+  .d-row:last-child{border-bottom:none}
+  .d-row .k{color:var(--slate)}
+  .d-empty{color:var(--slate);font-size:13px;font-style:italic}
+
+  a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+  @media (max-width:900px){
+    .shell{grid-template-columns:1fr}
+    .sidebar{flex-direction:row;overflow-x:auto;padding:12px}
+    .crest,.sidebar-foot{display:none}
+    nav.tabs{flex-direction:row;padding:0}
+    main{padding:20px 16px 40px}
+    .kpi-row{grid-template-columns:repeat(2,1fr)}
+    .grid-2{grid-template-columns:1fr}
+    .masthead{flex-direction:column;align-items:flex-start;gap:10px}
+  }
+</style>
+</head>
+<body>
+
+<div id="login">
+  <div class="card">
+    <div class="crest-mark">SA</div>
+    <h1>Santa Aurelia</h1>
+    <p>Headmaster console. Owner access only.</p>
+    <label for="email">Email</label>
+    <input id="email" type="email" autocomplete="username" placeholder="you@school.sch.id">
+    <label for="password">Password</label>
+    <input id="password" type="password" autocomplete="current-password">
+    <button id="loginBtn">Sign in</button>
+    <div class="err" id="loginErr"></div>
+  </div>
+</div>
+
+<div class="shell" id="app" style="display:none">
+  <aside class="sidebar">
+    <div class="crest">
+      <div class="crest-mark">SA</div>
+      <div class="crest-text">Santa<br>Aurelia<span>School CRM</span></div>
+    </div>
+    <nav class="tabs" id="nav">
+      <button data-view="overview" class="active"><span class="num">01</span> Overview</button>
+      <button data-view="enrollment"><span class="num">02</span> Enrollment</button>
+      <button data-view="tuition"><span class="num">03</span> Tuition</button>
+      <button data-view="attendance"><span class="num">04</span> Attendance</button>
+      <button data-view="grades"><span class="num">05</span> Grades</button>
+      <button data-view="incidents"><span class="num">06</span> Incidents</button>
+      <button data-view="settings"><span class="num">07</span> Settings</button>
+    </nav>
+    <div class="sidebar-foot">
+      <strong id="userName">—</strong>
+      Headmaster
+      <a id="logoutBtn">Sign out</a>
+    </div>
+  </aside>
+
+  <main>
+    <div class="masthead">
+      <div>
+        <h1 id="greeting">Loading…</h1>
+        <p id="dateline"></p>
+      </div>
+      <span class="term-tag" id="termTag">—</span>
+    </div>
+
+    <!-- OVERVIEW -->
+    <div id="view-overview">
+      <div class="kpi-row">
+        <div class="kpi"><div class="kpi-label">Enrolled students</div><div class="kpi-value" id="kpiStudents">—</div><div class="kpi-delta" id="kpiStudentsSub"></div></div>
+        <div class="kpi"><div class="kpi-label">Tuition collected</div><div class="kpi-value" id="kpiCollected">—</div><div class="kpi-delta" id="kpiCollectedSub"></div></div>
+        <div class="kpi"><div class="kpi-label">Overdue invoices</div><div class="kpi-value" id="kpiOverdue">—</div><div class="kpi-delta down" id="kpiOverdueSub"></div></div>
+        <div class="kpi"><div class="kpi-label">Attendance today</div><div class="kpi-value" id="kpiAttendance">—</div><div class="kpi-delta" id="kpiAttendanceSub"></div></div>
+      </div>
+      <div class="grid-2">
+        <div>
+          <div class="section-head"><h2>Enrollment by class</h2></div>
+          <div class="ledger" id="ledger"><div class="empty">Loading…</div></div>
+        </div>
+        <div>
+          <div class="section-head"><h2>Overdue tuition</h2></div>
+          <div class="panel" id="overdue"><div class="empty">Loading…</div></div>
+        </div>
+      </div>
+      <div class="section-head"><h2>Recent incidents</h2></div>
+      <div class="panel" id="incidents"><div class="empty">Loading…</div></div>
+
+      <div class="grid-2" style="margin-top:32px">
+        <div>
+          <div class="section-head"><h2>At-risk attendance</h2></div>
+          <div class="panel" id="atRisk"><div class="empty">Loading…</div></div>
+        </div>
+        <div>
+          <div class="section-head"><h2>Re-enrollment</h2></div>
+          <div class="panel" id="reEnroll"><div class="empty">Loading…</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ENROLLMENT -->
+    <div id="view-enrollment" style="display:none">
+      <div class="section-head">
+        <h2>Students</h2>
+        <div><button class="btn btn-ghost" onclick="openImport()">Import CSV</button> <button class="btn btn-primary" onclick="openAddStudent()">+ Add student</button></div>
+      </div>
+      <div id="studentsTable"><div class="empty">Loading…</div></div>
+
+      <div class="section-head" style="margin-top:36px">
+        <h2>Classes &amp; rosters</h2>
+        <button class="btn btn-primary" onclick="openAddClass()">+ Add class</button>
+      </div>
+      <div id="classesTable"><div class="empty">Loading…</div></div>
+    </div>
+
+    <!-- OTHER TABS (placeholders for now) -->
+    <div id="view-tuition" style="display:none">
+      <div class="section-head">
+        <h2>Tuition</h2>
+        <div><button class="btn btn-ghost" onclick="generateInvoices()">Generate Uang Sekolah (semua keluarga)</button> <button class="btn btn-primary" onclick="openBuildInvoice()">+ Buat Invoice</button></div>
+      </div>
+      <p style="color:var(--slate);font-size:13px;margin-bottom:16px">Satu invoice per keluarga, dengan rincian komponen biaya. Pembayaran bisa dicicil — klik “Kelola” untuk mencatat cicilan.</p>
+      <div id="tuitionTable"><div class="empty">Loading…</div></div>
+    </div>
+    <div id="view-attendance" style="display:none">
+      <div class="section-head"><h2>Mark attendance</h2></div>
+      <div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-bottom:18px">
+        <div><label style="display:block;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--slate);margin-bottom:5px">Class</label><select id="att_class" class="inline" style="max-width:220px" onchange="loadRoster()"></select></div>
+        <div><label style="display:block;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--slate);margin-bottom:5px">Date</label><input id="att_date" type="date" class="inline" style="max-width:170px" onchange="loadRoster()"></div>
+        <button class="btn btn-ghost" onclick="markAll('present')">Mark all present</button>
+        <button class="btn btn-primary" onclick="saveAttendance()">Save attendance</button>
+      </div>
+      <div id="att_roster"><div class="empty">Pick a class to load its roster.</div></div>
+    </div>
+    <div id="view-grades" style="display:none">
+      <div class="section-head"><h2>Grades &amp; report cards</h2></div>
+      <div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-bottom:18px">
+        <div><label style="display:block;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--slate);margin-bottom:5px">Class</label><select id="gr_class" class="inline" style="max-width:220px" onchange="loadGradeSheet()"></select></div>
+        <button class="btn btn-primary" onclick="saveGrades()">Save grades</button>
+      </div>
+      <p style="color:var(--slate);font-size:13px;margin-bottom:14px">Enter the term grade for each student, then generate a report card (grade + attendance + comment) to send home.</p>
+      <div id="gradeSheet"><div class="empty">Pick a class to load its roster.</div></div>
+    </div>
+    <div id="view-incidents" style="display:none">
+      <div class="section-head">
+        <h2>Incident log</h2>
+        <button class="btn btn-primary" onclick="openAddIncident()">+ Log incident</button>
+      </div>
+      <div id="incidentsFull"><div class="empty">Loading…</div></div>
+    </div>
+    <div id="view-settings" style="display:none">
+      <div class="section-head"><h2>Terms</h2></div>
+      <p style="color:var(--slate);font-size:13px;margin-bottom:16px">Each term scopes enrollment, billing, and grades. One term is active at a time; the whole app follows it.</p>
+      <div style="background:var(--paper-raised);border:1px solid var(--hairline);padding:22px;max-width:560px;margin-bottom:18px">
+        <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px">
+          <div><label style="display:block;font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--slate);margin-bottom:5px">Term label</label><input id="tm_label" placeholder="Semester 2 · 2026/2027" style="width:100%;padding:9px 11px;border:1px solid var(--hairline);border-radius:var(--radius)"></div>
+          <div><label style="display:block;font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--slate);margin-bottom:5px">Start</label><input id="tm_start" type="date" style="width:100%;padding:9px 11px;border:1px solid var(--hairline);border-radius:var(--radius)"></div>
+          <div><label style="display:block;font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--slate);margin-bottom:5px">End</label><input id="tm_end" type="date" style="width:100%;padding:9px 11px;border:1px solid var(--hairline);border-radius:var(--radius)"></div>
+        </div>
+        <div style="display:flex;align-items:flex-end;gap:10px;margin-top:12px">
+          <div style="flex:1"><label style="display:block;font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--slate);margin-bottom:5px">Tuition per student (Rp)</label><input id="tm_fee" type="number" style="width:100%;padding:9px 11px;border:1px solid var(--hairline);border-radius:var(--radius)"></div>
+          <button class="btn btn-primary" onclick="addTerm()">Add term</button>
+        </div>
+        <span id="term_msg" style="font-size:13px"></span>
+      </div>
+      <div id="termsTable"><div class="empty">Loading…</div></div>
+
+      <div class="section-head" style="margin-top:36px"><h2>Staff access</h2></div>
+      <p style="color:var(--slate);font-size:13px;margin-bottom:16px">Teachers register through the teacher app, then appear here for approval. Only approved staff can mark attendance.</p>
+      <div id="staffTable"><div class="empty">Loading…</div></div>
+
+      <div class="section-head" style="margin-top:36px"><h2>School configuration</h2></div>
+      <p style="color:var(--slate);font-size:13px;margin-bottom:16px">Change these without touching the database. Lists are comma-separated.</p>
+      <div style="background:var(--paper-raised);border:1px solid var(--hairline);padding:22px;max-width:560px">
+        <label style="display:block;font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--slate);margin:0 0 5px">School name</label>
+        <input id="cfg_name" style="width:100%;padding:9px 11px;border:1px solid var(--hairline);border-radius:var(--radius)">
+        <label style="display:block;font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--slate);margin:14px 0 5px">Term tuition, per student (Rp)</label>
+        <input id="cfg_tuition" type="number" style="width:100%;padding:9px 11px;border:1px solid var(--hairline);border-radius:var(--radius)">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px">
+          <div><label style="display:block;font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--slate);margin-bottom:5px">Invoice due day</label><input id="cfg_dueday" type="number" style="width:100%;padding:9px 11px;border:1px solid var(--hairline);border-radius:var(--radius)"></div>
+          <div><label style="display:block;font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--slate);margin-bottom:5px">Overdue after (days)</label><input id="cfg_followup" type="number" style="width:100%;padding:9px 11px;border:1px solid var(--hairline);border-radius:var(--radius)"></div>
+        </div>
+        <label style="display:block;font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--slate);margin:14px 0 5px">At-risk attendance below (%)</label>
+        <input id="cfg_threshold" type="number" style="width:100%;padding:9px 11px;border:1px solid var(--hairline);border-radius:var(--radius)">
+        <label style="display:block;font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--slate);margin:14px 0 5px">Grade levels</label>
+        <input id="cfg_levels" style="width:100%;padding:9px 11px;border:1px solid var(--hairline);border-radius:var(--radius)">
+        <label style="display:block;font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--slate);margin:14px 0 5px">Grade scale</label>
+        <input id="cfg_grades" style="width:100%;padding:9px 11px;border:1px solid var(--hairline);border-radius:var(--radius)">
+        <label style="display:block;font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--slate);margin:14px 0 5px">Incident categories</label>
+        <input id="cfg_cats" style="width:100%;padding:9px 11px;border:1px solid var(--hairline);border-radius:var(--radius)">
+        <label style="display:block;font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--slate);margin:14px 0 5px">Komponen biaya (fee components)</label>
+        <input id="cfg_fees" style="width:100%;padding:9px 11px;border:1px solid var(--hairline);border-radius:var(--radius)">
+        <div style="font-size:11px;color:var(--slate);margin-top:3px">e.g. Uang Pangkal, Registrasi, Uang Sekolah, Seragam, Buku, Ekskul, Lomba, Daftar Ulang, Lainnya</div>
+        <div style="margin-top:20px"><button class="btn btn-primary" onclick="saveConfig()">Save configuration</button> <span id="cfg_msg" style="font-size:13px;margin-left:10px"></span></div>
+      </div>
+
+      <div class="section-head" style="margin-top:36px"><h2>Messages &amp; payment</h2></div>
+      <p style="color:var(--slate);font-size:13px;margin-bottom:16px">Wording for WhatsApp messages and the payment details shown on invoices. Tokens in <code>{curly braces}</code> are filled in automatically.</p>
+      <div style="background:var(--paper-raised);border:1px solid var(--hairline);padding:22px;max-width:560px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+          <div><label style="display:block;font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--slate);margin-bottom:5px">Bank name</label><input id="cfg_bankname" style="width:100%;padding:9px 11px;border:1px solid var(--hairline);border-radius:var(--radius)" placeholder="e.g. BCA"></div>
+          <div><label style="display:block;font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--slate);margin-bottom:5px">Account (no. &amp; name)</label><input id="cfg_bankacct" style="width:100%;padding:9px 11px;border:1px solid var(--hairline);border-radius:var(--radius)" placeholder="1234567890 a/n Santa Aurelia"></div>
+        </div>
+        <label style="display:block;font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--slate);margin:14px 0 5px">Tuition reminder (WhatsApp)</label>
+        <textarea id="cfg_remtpl" style="width:100%;min-height:80px;padding:9px 11px;border:1px solid var(--hairline);border-radius:var(--radius);font-family:var(--sans);resize:vertical"></textarea>
+        <div style="font-size:11px;color:var(--slate);margin-top:3px">Tokens: {parent} {students} {amount} {due} {term} {bank} {biz}</div>
+        <label style="display:block;font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--slate);margin:14px 0 5px">Report card summary (WhatsApp)</label>
+        <textarea id="cfg_reptpl" style="width:100%;min-height:80px;padding:9px 11px;border:1px solid var(--hairline);border-radius:var(--radius);font-family:var(--sans);resize:vertical"></textarea>
+        <div style="font-size:11px;color:var(--slate);margin-top:3px">Tokens: {parent} {student} {grade} {attendance} {comment} {term} {biz}</div>
+        <div style="margin-top:20px"><button class="btn btn-primary" onclick="saveMessages()">Save messages &amp; payment</button> <span id="msg_msg" style="font-size:13px;margin-left:10px"></span></div>
+      </div>
+
+      <div class="section-head" style="margin-top:36px"><h2>Activity log</h2></div>
+      <p style="color:var(--slate);font-size:13px;margin-bottom:16px">Recent changes made in the system, newest first.</p>
+      <div id="auditTable"><div class="empty">Loading…</div></div>
+    </div>
+  </main>
+</div>
+
+<!-- Add student modal -->
+<div class="modal-bg" id="studentModal">
+  <div class="modal">
+    <h3 id="sm_title">Add student</h3>
+    <div class="modal-sub">Creates the family record and the student together.</div>
+    <label>Parent / guardian name</label>
+    <input id="sm_parent" placeholder="e.g. Keluarga Santoso">
+    <div class="row2">
+      <div><label>Parent phone</label><input id="sm_phone" placeholder="0812…"></div>
+      <div><label>Parent email</label><input id="sm_email" placeholder="optional"></div>
+    </div>
+    <label>Student name</label>
+    <input id="sm_name" placeholder="Child's full name">
+    <div class="row2">
+      <div><label>Date of birth</label><input id="sm_dob" type="date"></div>
+      <div><label>Grade level</label><select id="sm_grade"></select></div>
+    </div>
+    <div id="sm_custom"></div>
+    <div class="err" id="sm_err"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('studentModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveStudent()">Save student</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add class modal -->
+<div class="modal-bg" id="classModal">
+  <div class="modal">
+    <h3 id="cm_title">Add class</h3>
+    <div class="modal-sub">A class runs for the current term with one teacher.</div>
+    <label>Class name</label>
+    <input id="cm_name" placeholder="e.g. Grade 1A or TK A Pagi">
+    <label>Teacher</label>
+    <select id="cm_teacher"></select>
+    <div class="row2">
+      <div><label>Room</label><input id="cm_room" placeholder="optional"></div>
+      <div><label>Capacity</label><input id="cm_cap" type="number" value="25"></div>
+    </div>
+    <label>Schedule</label>
+    <input id="cm_sched" placeholder="e.g. Mon–Fri 07:30">
+    <div class="err" id="cm_err"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('classModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveClass()">Save class</button>
+    </div>
+  </div>
+</div>
+
+<!-- CSV import modal -->
+<div class="modal-bg" id="importModal">
+  <div class="modal">
+    <h3>Import students from CSV</h3>
+    <div class="modal-sub">Paste rows below. First line must be the header, exactly:</div>
+    <code style="display:block;background:var(--paper);padding:8px 10px;border-radius:var(--radius);font-size:12px;margin-bottom:12px">parent_name,phone,email,student_name,grade_level</code>
+    <textarea id="imp_text" style="min-height:160px;font-family:var(--mono);font-size:12px" placeholder="parent_name,phone,email,student_name,grade_level&#10;Keluarga Tan,08123456789,tan@mail.com,Michael Tan,Grade 1"></textarea>
+    <div class="field-note">One student per line. Don't use commas inside a field. A parent that already exists (same name) is reused.</div>
+    <div class="err" id="imp_err"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('importModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="runImport()">Import</button>
+    </div>
+  </div>
+</div>
+
+<!-- Build invoice modal -->
+<div class="modal-bg" id="buildModal">
+  <div class="modal">
+    <h3>Buat Invoice</h3>
+    <div class="modal-sub">Pilih keluarga, isi jumlah untuk komponen yang berlaku (kosongkan yang tidak dipakai).</div>
+    <label>Keluarga</label>
+    <select id="bi_parent"></select>
+    <div id="bi_items"></div>
+    <label>Jatuh tempo</label>
+    <input id="bi_due" type="date">
+    <div class="err" id="bi_err"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('buildModal')">Batal</button>
+      <button class="btn btn-primary" onclick="saveInvoice()">Simpan invoice</button>
+    </div>
+  </div>
+</div>
+
+<!-- Manage invoice modal -->
+<div class="modal-bg" id="manageModal">
+  <div class="modal">
+    <h3>Kelola Invoice</h3>
+    <div class="modal-sub" id="mi_family"></div>
+    <div id="mi_body"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('manageModal')">Tutup</button>
+    </div>
+  </div>
+</div>
+
+<!-- Build invoice modal end -->
+<!-- Student 360 drawer -->
+<div class="drawer-bg" id="s360bg" onclick="if(event.target===this)closeStudent()">
+  <div class="drawer" id="s360"></div>
+</div>
+
+<!-- Log incident modal -->
+<div class="modal-bg" id="incidentModal">
+  <div class="modal">
+    <h3>Log incident</h3>
+    <div class="modal-sub">Record what happened and who was involved.</div>
+    <label>Student</label>
+    <select id="im_student"></select>
+    <label>Category</label>
+    <select id="im_category"></select>
+    <label>What happened</label>
+    <textarea id="im_desc" placeholder="Describe the incident and any action taken."></textarea>
+    <div class="err" id="im_err"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('incidentModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveIncident()">Save incident</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// ===== Config =====
+const SUPABASE_URL = 'https://ltparcxjrbsibbxoyohx.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx0cGFyY3hqcmJzaWJieG95b2h4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI4ODY5NjAsImV4cCI6MjA5ODQ2Mjk2MH0.5-9OBlQ36eQBJ-noGDIC5dYKmn4WKhFzACwiCTFOtgY';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// ===== Globals =====
+let TERM=null, ALLTERMS=[], CFG={}, BANK={}, STUDENTS=[], PARENTS=[], INVOICES=[], CLASSES=[], TEACHERS=[], STAFF=[], ATTENDANCE=[], INCIDENTS=[], ENROLLMENTS=[];
+let ACTIVE='overview';
+
+// ===== Helpers =====
+const rp = n => 'Rp ' + (Number(n)||0).toLocaleString('id-ID');
+const daysBetween = (a,b) => Math.round((b-a)/86400000);
+const el = id => document.getElementById(id);
+const esc = s => (s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+async function logAudit(action, detail){
+  try{
+    const { data:{ session } } = await sb.auth.getSession();
+    await sb.from('audit_log').insert({ actor_id:session?.user?.id||null, actor_email:session?.user?.email||null, action, detail:detail||null });
+  }catch(e){ /* never block a save on logging */ }
+}
+
+// ===== Auth =====
+async function checkAuthState(){
+  const { data:{ session } } = await sb.auth.getSession();
+  if(!session){ showLogin(); return; }
+  const { data:me } = await sb.from('admin_users').select('name,role,status').eq('id', session.user.id).single();
+  if(!me || me.role!=='owner' || me.status!=='approved'){
+    el('loginErr').style.color='var(--rust)';
+    el('loginErr').textContent = 'This account is not an approved owner.';
+    await sb.auth.signOut(); showLogin(); return;
+  }
+  el('userName').textContent = me.name;
+  el('login').style.display='none';
+  el('app').style.display='grid';
+  loadAll();
+}
+function showLogin(){ el('app').style.display='none'; el('login').style.display='flex'; }
+
+el('loginBtn').addEventListener('click', async () => {
+  el('loginErr').textContent='';
+  const { error } = await sb.auth.signInWithPassword({ email: el('email').value.trim(), password: el('password').value });
+  if(error){ el('loginErr').style.color='var(--rust)'; el('loginErr').textContent = error.message; return; }
+  checkAuthState();
+});
+el('password').addEventListener('keydown', e => { if(e.key==='Enter') el('loginBtn').click(); });
+el('logoutBtn').addEventListener('click', async () => { await sb.auth.signOut(); showLogin(); });
+
+// ===== View switching =====
+el('nav').addEventListener('click', e => {
+  const btn = e.target.closest('button'); if(!btn) return;
+  ACTIVE = btn.dataset.view;
+  [...el('nav').children].forEach(b => b.classList.toggle('active', b===btn));
+  ['overview','enrollment','tuition','attendance','grades','incidents','settings'].forEach(v =>
+    el('view-'+v).style.display = (v===ACTIVE ? 'block' : 'none'));
+  refreshActiveView();
+});
+
+// ===== Load =====
+async function loadAll(){
+  const term = await sb.from('terms').select('*').eq('is_active', true).limit(1).maybeSingle();
+  TERM = term.data || null;
+  const allTerms = await sb.from('terms').select('*').order('start_date');
+  ALLTERMS = allTerms.data || [];
+  const [settings, students, parents, invoices, classes, teachers, attendance, incidents, enrollments] = await Promise.all([
+    sb.from('school_settings').select('config,bank_name,bank_account').eq('id',1).maybeSingle(),
+    sb.from('students').select('*').eq('status','active').order('name'),
+    sb.from('parents').select('*'),
+    sb.from('invoices').select('*, parents(name,phone,email)'),
+    sb.from('classes').select('*, enrollments(count)').order('name'),
+    sb.from('admin_users').select('id,name,email,role,status'),
+    sb.from('attendance').select('status,date').eq('date', new Date().toISOString().slice(0,10)),
+    sb.from('incidents').select('*, students(name)').order('created_at',{ascending:false}).limit(8),
+    sb.from('enrollments').select('*')
+  ]);
+  CFG         = settings.data?.config || {};
+  BANK        = { name: settings.data?.bank_name || '', account: settings.data?.bank_account || '' };
+  STUDENTS    = students.data || [];
+  PARENTS     = parents.data || [];
+  INVOICES    = invoices.data || [];
+  CLASSES     = classes.data || [];
+  STAFF       = teachers.data || [];
+  TEACHERS    = STAFF.filter(t=>t.status==='approved');
+  ATTENDANCE  = attendance.data || [];
+  INCIDENTS   = incidents.data || [];
+  ENROLLMENTS = enrollments.data || [];
+  refreshActiveView();
+}
+
+// ===== Render dispatcher =====
+function refreshActiveView(){
+  renderMasthead();
+  if(ACTIVE==='overview'){ renderKpis(); renderLedger(); renderOverdue(); renderIncidents(); renderAnalytics(); }
+  if(ACTIVE==='enrollment'){ renderStudents(); renderClasses(); }
+  if(ACTIVE==='attendance'){ renderAttendance(); }
+  if(ACTIVE==='tuition'){ renderTuition(); }
+  if(ACTIVE==='grades'){ renderGrades(); }
+  if(ACTIVE==='incidents'){ renderIncidentsTab(); }
+  if(ACTIVE==='settings'){ renderSettings(); }
+}
+
+function renderMasthead(){
+  const hour = new Date().getHours();
+  const part = hour<12 ? 'morning' : hour<18 ? 'afternoon' : 'evening';
+  el('greeting').textContent = `Good ${part}, ${el('userName').textContent}`;
+  el('dateline').textContent = new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  el('termTag').textContent = TERM ? TERM.label : 'No active term';
+}
+
+// ===== Overview =====
+function renderKpis(){
+  el('kpiStudents').textContent = STUDENTS.length;
+  el('kpiStudentsSub').textContent = 'Active this term';
+  const total = INVOICES.reduce((s,i)=>s+Number(i.amount||0),0);
+  const paid  = INVOICES.filter(i=>i.status==='paid').reduce((s,i)=>s+Number(i.amount||0),0);
+  el('kpiCollected').innerHTML = (total?Math.round(paid/total*100):0) + '<small>%</small>';
+  el('kpiCollectedSub').textContent = `${rp(paid)} of ${rp(total)}`;
+  const today = new Date().toISOString().slice(0,10);
+  const overdue = INVOICES.filter(i => i.status==='unpaid' && i.due_date && i.due_date < today);
+  const outstanding = INVOICES.filter(i=>i.status==='unpaid').reduce((s,i)=>s+Number(i.amount||0),0);
+  el('kpiOverdue').textContent = overdue.length;
+  el('kpiOverdueSub').textContent = `${rp(outstanding)} outstanding`;
+  if(ATTENDANCE.length){
+    const here = ATTENDANCE.filter(a => a.status==='present' || a.status==='late').length;
+    el('kpiAttendance').innerHTML = Math.round(here/ATTENDANCE.length*100) + '<small>%</small>';
+    el('kpiAttendanceSub').textContent = `${here} of ${ATTENDANCE.length} marked`;
+  } else { el('kpiAttendance').textContent='—'; el('kpiAttendanceSub').textContent='No attendance marked yet'; }
+}
+function teacherName(id){ const t = TEACHERS.find(t=>t.id===id); return t ? t.name : 'Unassigned'; }
+function activeClasses(){ return TERM ? CLASSES.filter(c=>c.term_id===TERM.id) : CLASSES; }
+function renderLedger(){
+  const box = el('ledger');
+  const cls = activeClasses();
+  if(!cls.length){ box.innerHTML='<div class="empty">No classes yet. Add one on the Enrollment tab.</div>'; return; }
+  box.innerHTML = cls.map(c => {
+    const count = c.enrollments?.[0]?.count ?? 0, cap = c.capacity||25;
+    const pct = Math.min(100, Math.round(count/cap*100));
+    return `<div class="ledger-row"><div><div class="cls-name">${esc(c.name)}</div><div class="cls-teacher">${esc(teacherName(c.teacher_id))}</div></div><div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div><div class="cls-count">${count} / ${cap}</div></div>`;
+  }).join('');
+}
+function renderOverdue(){
+  const box = el('overdue'), today = new Date();
+  const rows = INVOICES.filter(i=>i.status==='unpaid').map(i=>({...i, days:i.due_date?daysBetween(new Date(i.due_date),today):0})).sort((a,b)=>b.days-a.days).slice(0,5);
+  if(!rows.length){ box.innerHTML='<div class="empty">Nothing outstanding.</div>'; return; }
+  box.innerHTML = rows.map(i=>{
+    const od=i.days>0, meta=i.due_date?(od?`${i.days} days overdue`:`due in ${Math.abs(i.days)} days`):'no due date';
+    return `<div class="panel-item"><div><div class="who">${esc(i.parents?.name||'Unknown family')}</div><div class="meta">${meta}</div></div><div style="text-align:right"><div class="amount">${rp(i.amount)}</div><span class="stamp ${od?'overdue':'pending'}">${od?'Overdue':'Pending'}</span></div></div>`;
+  }).join('');
+}
+function renderIncidents(){
+  const box = el('incidents');
+  if(!INCIDENTS.length){ box.innerHTML='<div class="empty">No incidents logged.</div>'; return; }
+  const stampFor = s => s==='resolved'?'<span class="stamp paid">Resolved</span>':s==='follow-up'?'<span class="stamp pending">Follow-up</span>':'<span class="stamp overdue">Open</span>';
+  box.innerHTML = INCIDENTS.map(i=>`<div class="panel-item"><div>${i.category?`<span class="incident-cat">${esc(i.category)}</span>`:''}<span class="who">${esc(i.students?.name||'Unknown')} — ${esc(i.description)}</span><div class="meta">${new Date(i.created_at).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}</div></div>${stampFor(i.status)}</div>`).join('');
+}
+
+// ===== Student 360 =====
+function closeStudent(){ el('s360bg').classList.remove('open'); }
+async function openStudent(id){
+  const s = STUDENTS.find(x=>x.id===id); if(!s) return;
+  const parent = PARENTS.find(p=>p.id===s.parent_id) || {};
+  const cid = classOfStudent(id); const cls = CLASSES.find(c=>c.id===cid);
+  el('s360bg').classList.add('open');
+  el('s360').innerHTML = `<div class="d-head"><button class="d-close" onclick="closeStudent()">×</button><h2>${esc(s.name)}</h2><div class="d-meta">${esc(s.grade_level||'')} · ${esc(cls?cls.name:'not enrolled')}</div><div style="margin-top:12px;display:flex;gap:8px"><button class="btn btn-ghost" style="background:rgba(255,255,255,.12);color:#fff;border-color:rgba(255,255,255,.3)" onclick="openEditStudent('${s.id}')">Edit</button><button class="btn btn-ghost" style="background:rgba(255,255,255,.12);color:#fff;border-color:rgba(255,255,255,.3)" onclick="deleteStudent('${s.id}')">Delete</button></div></div><div class="d-body"><div class="d-empty">Loading…</div></div>`;
+
+  const [grades, att, incidents] = await Promise.all([
+    sb.from('grades').select('*').eq('student_id',id),
+    sb.from('attendance').select('status,date').eq('student_id',id).order('date',{ascending:false}),
+    sb.from('incidents').select('*').eq('student_id',id).order('created_at',{ascending:false})
+  ]);
+  const G = grades.data||[], A = att.data||[], I = incidents.data||[];
+  const famInv = INVOICES.filter(i=>i.parent_id===s.parent_id);
+  const perTerm = ALLTERMS.map(t=>{
+    const inTerm = A.filter(a=> t.start_date && t.end_date && a.date >= t.start_date && a.date <= t.end_date);
+    const here = inTerm.filter(a=>a.status==='present'||a.status==='late').length;
+    return { label:t.label, total:inTerm.length, rate: inTerm.length? Math.round(here/inTerm.length*100) : null };
+  }).filter(x=>x.total>0);
+  const recentAbs = A.filter(a=>a.status==='absent'||a.status==='late').slice(0,6);
+  const termLabel = tid => { const t = ALLTERMS.find(x=>x.id===tid); return t?t.label:''; };
+  const cfDefs = (CFG.customFields && CFG.customFields.students) || [];
+
+  const detailRows = [
+    ['Parent / guardian', esc(parent.name||'—')],
+    ['Phone', esc(parent.phone||'—')],
+    ['Date of birth', esc(s.date_of_birth||'—')]
+  ].concat(cfDefs.map(f=>[esc(f.label), esc((s.custom&&s.custom[f.id])||'—')]));
+
+  const gradesHtml = G.length
+    ? G.map(g=>`<div class="d-row"><span class="k">${esc(termLabel(g.term_id))} · ${esc(g.assessment)}</span><span>${esc(g.label||'')}${g.score!=null?` (${g.score})`:''}</span></div>${g.comment?`<div class="d-row" style="border:none"><span class="k" style="font-style:italic">${esc(g.comment)}</span></div>`:''}`).join('')
+    : '<div class="d-empty">No grades recorded.</div>';
+
+  const invHtml = famInv.length
+    ? famInv.map(i=>`<div class="d-row"><span class="k">${esc(i.due_date||'')}</span><span>${rp(i.amount)} · ${esc(i.status)}</span></div>`).join('')
+    : '<div class="d-empty">No invoices.</div>';
+
+  const incHtml = I.length
+    ? I.map(i=>`<div class="d-row"><span class="k">${i.category?esc(i.category)+' · ':''}${esc(i.description)}</span><span>${esc(i.status)}</span></div>`).join('')
+    : '<div class="d-empty">No incidents.</div>';
+
+  el('s360').querySelector('.d-body').innerHTML = `
+    <div class="d-sec"><h3>Details</h3>${detailRows.map(r=>`<div class="d-row"><span class="k">${r[0]}</span><span>${r[1]}</span></div>`).join('')}</div>
+    <div class="d-sec"><h3>Attendance history</h3>${
+      perTerm.length ? perTerm.map(p=>`<div class="d-row"><span class="k">${esc(p.label)}</span><span>${p.rate}% (${p.total} days)</span></div>`).join('') : '<div class="d-empty">No attendance recorded.</div>'
+    }${recentAbs.length?`<div class="d-row" style="border:none;margin-top:6px"><span class="k" style="font-size:12px">Recent absences/lates: ${recentAbs.map(a=>esc(a.date)+' ('+esc(a.status)+')').join(', ')}</span></div>`:''}</div>
+    <div class="d-sec"><h3>Grades</h3>${gradesHtml}</div>
+    <div class="d-sec"><h3>Family invoices</h3>${invHtml}</div>
+    <div class="d-sec"><h3>Incidents</h3>${incHtml}</div>`;
+}
+
+// ===== Analytics =====
+let ATT_CACHE = { termId:null, rows:null };
+async function renderAnalytics(){
+  renderReEnroll();
+  await renderAtRisk();
+}
+function studentClassName(sid){
+  const cid = classOfStudent(sid);
+  const c = CLASSES.find(x=>x.id===cid);
+  return c ? c.name : '—';
+}
+async function renderAtRisk(){
+  const box = el('atRisk');
+  if(!TERM){ box.innerHTML='<div class="empty">No active term.</div>'; return; }
+  if(ATT_CACHE.termId !== TERM.id){
+    const { data } = await sb.from('attendance').select('student_id,status').gte('date',TERM.start_date).lte('date',TERM.end_date);
+    ATT_CACHE = { termId:TERM.id, rows:data||[] };
+  }
+  const rows = ATT_CACHE.rows;
+  if(!rows.length){ box.innerHTML='<div class="empty">No attendance recorded yet this term.</div>'; return; }
+  const tally = {};
+  rows.forEach(r=>{ const t=tally[r.student_id]=tally[r.student_id]||{here:0,total:0}; t.total++; if(r.status==='present'||r.status==='late') t.here++; });
+  const threshold = Number(CFG.attendanceThreshold) || 80;
+  const enrolledIds = new Set(ENROLLMENTS.filter(e=>e.term_id===TERM.id && e.status==='enrolled').map(e=>e.student_id));
+  const atRisk = Object.keys(tally)
+    .filter(sid=>enrolledIds.has(sid) && tally[sid].total>=3)
+    .map(sid=>({ sid, rate:Math.round(tally[sid].here/tally[sid].total*100) }))
+    .filter(x=>x.rate < threshold)
+    .sort((a,b)=>a.rate-b.rate)
+    .slice(0,8);
+  if(!atRisk.length){ box.innerHTML=`<div class="empty">Every student is above ${threshold}% attendance. 👍</div>`; return; }
+  box.innerHTML = atRisk.map(x=>{
+    const s = STUDENTS.find(st=>st.id===x.sid) || {};
+    return `<div class="panel-item"><div><div class="who">${esc(s.name||'Unknown')}</div><div class="meta">${esc(studentClassName(x.sid))}</div></div><span class="stamp overdue">${x.rate}%</span></div>`;
+  }).join('');
+}
+function renderReEnroll(){
+  const box = el('reEnroll');
+  if(!TERM){ box.innerHTML='<div class="empty">No active term.</div>'; return; }
+  const next = ALLTERMS.filter(t=>t.start_date && TERM.start_date && t.start_date > TERM.start_date).sort((a,b)=>a.start_date.localeCompare(b.start_date))[0];
+  if(!next){ box.innerHTML='<div class="empty">Add a future term in Settings to track re-enrollment.</div>'; return; }
+  const current = new Set(ENROLLMENTS.filter(e=>e.term_id===TERM.id && e.status==='enrolled').map(e=>e.student_id));
+  const nextSet = new Set(ENROLLMENTS.filter(e=>e.term_id===next.id && e.status==='enrolled').map(e=>e.student_id));
+  let back=0; current.forEach(sid=>{ if(nextSet.has(sid)) back++; });
+  const total = current.size, pct = total ? Math.round(back/total*100) : 0;
+  box.innerHTML = `<div style="padding:18px 16px">
+    <div style="font-family:var(--serif);font-size:32px;font-weight:600">${back} / ${total}</div>
+    <div class="meta" style="margin:6px 0 12px">students re-enrolled for ${esc(next.label)}</div>
+    <div class="bar-track" style="height:8px"><div class="bar-fill" style="width:${pct}%"></div></div>
+    <div class="meta" style="margin-top:8px">${pct}% of this term's students signed up. ${total-back} not yet re-enrolled.</div>
+  </div>`;
+}
+
+// ===== Enrollment: students =====
+function parentName(id){ const p = PARENTS.find(p=>p.id===id); return p?p.name:'—'; }
+function classOfStudent(studentId){
+  if(!TERM) return null;
+  const e = ENROLLMENTS.find(e=>e.student_id===studentId && e.term_id===TERM.id && e.status==='enrolled');
+  return e ? e.class_id : null;
+}
+function renderStudents(){
+  const box = el('studentsTable');
+  if(!STUDENTS.length){ box.innerHTML='<div class="empty">No students yet. Click “Add student” to enrol the first one.</div>'; return; }
+  const classOptions = cid => ['<option value="">— not enrolled —</option>'].concat(
+    activeClasses().map(c=>`<option value="${c.id}" ${c.id===cid?'selected':''}>${esc(c.name)}</option>`)).join('');
+  box.innerHTML = `<table><thead><tr><th>Student</th><th>Grade</th><th>Parent</th><th>Class (this term)</th></tr></thead><tbody>${
+    STUDENTS.map(s=>{
+      const cid = classOfStudent(s.id);
+      return `<tr><td><a onclick="openStudent('${s.id}')" style="cursor:pointer;text-decoration:underline;text-underline-offset:2px"><strong>${esc(s.name)}</strong></a></td><td>${esc(s.grade_level||'—')}</td><td>${esc(parentName(s.parent_id))}</td><td><select class="inline" onchange="setEnrollment('${s.id}', this.value)">${classOptions(cid)}</select></td></tr>`;
+    }).join('')
+  }</tbody></table>`;
+}
+async function setEnrollment(studentId, classId){
+  if(!TERM){ alert('No active term set. Create one in Supabase first.'); return; }
+  await sb.from('enrollments').delete().eq('student_id', studentId).eq('term_id', TERM.id);
+  if(classId){
+    const { error } = await sb.from('enrollments').insert({ student_id:studentId, class_id:classId, term_id:TERM.id, status:'enrolled' });
+    if(error){ alert('Could not enrol: '+error.message); }
+  }
+  await loadAll();
+}
+
+// ===== Enrollment: classes =====
+function renderClasses(){
+  const box = el('classesTable');
+  const cls = activeClasses();
+  if(!cls.length){ box.innerHTML='<div class="empty">No classes yet. Add one to start building rosters.</div>'; return; }
+  box.innerHTML = `<table><thead><tr><th>Class</th><th>Teacher</th><th>Room</th><th>Schedule</th><th>Enrolled</th><th>Actions</th></tr></thead><tbody>${
+    cls.map(c=>{
+      const count = c.enrollments?.[0]?.count ?? 0;
+      return `<tr><td><strong>${esc(c.name)}</strong></td><td>${esc(teacherName(c.teacher_id))}</td><td>${esc(c.room||'—')}</td><td class="sub">${esc(c.schedule||'—')}</td><td>${count} / ${c.capacity||25}</td><td style="white-space:nowrap"><button class="btn btn-ghost" onclick="openEditClass('${c.id}')">Edit</button> <button class="btn btn-ghost" onclick="deleteClass('${c.id}')">Delete</button></td></tr>`;
+    }).join('')
+  }</tbody></table>`;
+}
+
+// ===== Modals =====
+function closeModal(id){ el(id).classList.remove('open'); }
+let EDIT_SID = null, EDIT_CID = null;
+
+function openAddStudent(){
+  EDIT_SID = null;
+  el('sm_title').textContent = 'Add student';
+  el('sm_parent').value=''; el('sm_phone').value=''; el('sm_email').value='';
+  el('sm_name').value=''; el('sm_dob').value=''; el('sm_err').textContent='';
+  const grades = CFG.gradeLevels || ['TK A','TK B','Grade 1','Grade 2','Grade 3','Grade 4','Grade 5','Grade 6'];
+  el('sm_grade').innerHTML = grades.map(g=>`<option>${esc(g)}</option>`).join('');
+  const cf = (CFG.customFields && CFG.customFields.students) || [];
+  el('sm_custom').innerHTML = cf.map(f=>`<label>${esc(f.label)}</label><input id="cf_${esc(f.id)}" data-cf="${esc(f.id)}">`).join('');
+  el('studentModal').classList.add('open');
+}
+function openEditStudent(id){
+  const s = STUDENTS.find(x=>x.id===id); if(!s) return;
+  const p = PARENTS.find(x=>x.id===s.parent_id) || {};
+  EDIT_SID = id;
+  el('sm_title').textContent = 'Edit student';
+  el('sm_parent').value = p.name||''; el('sm_phone').value = p.phone||''; el('sm_email').value = p.email||'';
+  el('sm_name').value = s.name||''; el('sm_dob').value = s.date_of_birth||''; el('sm_err').textContent='';
+  const grades = CFG.gradeLevels || ['TK A','TK B','Grade 1','Grade 2','Grade 3','Grade 4','Grade 5','Grade 6'];
+  el('sm_grade').innerHTML = grades.map(g=>`<option ${g===s.grade_level?'selected':''}>${esc(g)}</option>`).join('');
+  const cf = (CFG.customFields && CFG.customFields.students) || [];
+  el('sm_custom').innerHTML = cf.map(f=>`<label>${esc(f.label)}</label><input id="cf_${esc(f.id)}" data-cf="${esc(f.id)}" value="${esc((s.custom&&s.custom[f.id])||'')}">`).join('');
+  closeStudent();
+  el('studentModal').classList.add('open');
+}
+async function saveStudent(){
+  const err = el('sm_err'); err.textContent='';
+  const pName = el('sm_parent').value.trim(), sName = el('sm_name').value.trim();
+  if(!pName){ err.textContent='Parent name is required.'; return; }
+  if(!sName){ err.textContent='Student name is required.'; return; }
+  const custom = {};
+  document.querySelectorAll('#sm_custom [data-cf]').forEach(inp=>{ if(inp.value.trim()) custom[inp.dataset.cf]=inp.value.trim(); });
+
+  if(EDIT_SID){
+    const s = STUDENTS.find(x=>x.id===EDIT_SID);
+    await sb.from('parents').update({ name:pName, phone:el('sm_phone').value.trim()||null, email:el('sm_email').value.trim()||null }).eq('id', s.parent_id);
+    const { error } = await sb.from('students').update({ name:sName, date_of_birth:el('sm_dob').value||null, grade_level:el('sm_grade').value, custom }).eq('id', EDIT_SID);
+    if(error){ err.textContent='Could not save: '+error.message; return; }
+  } else {
+    let parentId = (PARENTS.find(p=>p.name.toLowerCase()===pName.toLowerCase())||{}).id;
+    if(!parentId){
+      const { data, error } = await sb.from('parents').insert({ name:pName, phone:el('sm_phone').value.trim()||null, email:el('sm_email').value.trim()||null }).select('id').single();
+      if(error){ err.textContent='Could not save parent: '+error.message; return; }
+      parentId = data.id;
+    }
+    const { error:e2 } = await sb.from('students').insert({ parent_id:parentId, name:sName, date_of_birth:el('sm_dob').value||null, grade_level:el('sm_grade').value, status:'active', custom });
+    if(e2){ err.textContent='Could not save student: '+e2.message; return; }
+  }
+  logAudit(EDIT_SID?'student.edit':'student.create', sName);
+  closeModal('studentModal');
+  await loadAll();
+}
+async function deleteStudent(id){
+  const s = STUDENTS.find(x=>x.id===id); if(!s) return;
+  if(!confirm(`Delete ${s.name}? This removes their enrollment, attendance, and grades. This cannot be undone.`)) return;
+  const { error } = await sb.from('students').delete().eq('id', id);
+  if(error){ alert('Could not delete: '+error.message); return; }
+  logAudit('student.delete', s.name);
+  closeStudent();
+  await loadAll();
+}
+
+function openAddClass(){
+  EDIT_CID = null;
+  el('cm_title').textContent = 'Add class';
+  el('cm_name').value=''; el('cm_room').value=''; el('cm_sched').value=''; el('cm_cap').value=25; el('cm_err').textContent='';
+  el('cm_teacher').innerHTML = ['<option value="">— unassigned —</option>'].concat(TEACHERS.map(t=>`<option value="${t.id}">${esc(t.name)}</option>`)).join('');
+  el('classModal').classList.add('open');
+}
+function openEditClass(id){
+  const c = activeClasses().find(x=>x.id===id) || CLASSES.find(x=>x.id===id); if(!c) return;
+  EDIT_CID = id;
+  el('cm_title').textContent = 'Edit class';
+  el('cm_name').value=c.name||''; el('cm_room').value=c.room||''; el('cm_sched').value=c.schedule||''; el('cm_cap').value=c.capacity||25; el('cm_err').textContent='';
+  el('cm_teacher').innerHTML = ['<option value="">— unassigned —</option>'].concat(TEACHERS.map(t=>`<option value="${t.id}" ${t.id===c.teacher_id?'selected':''}>${esc(t.name)}</option>`)).join('');
+  el('classModal').classList.add('open');
+}
+async function saveClass(){
+  const err = el('cm_err'); err.textContent='';
+  if(!TERM){ err.textContent='No active term. Create one in Settings first.'; return; }
+  const name = el('cm_name').value.trim();
+  if(!name){ err.textContent='Class name is required.'; return; }
+  const rec = { name, teacher_id:el('cm_teacher').value||null, room:el('cm_room').value.trim()||null, schedule:el('cm_sched').value.trim()||null, capacity:parseInt(el('cm_cap').value)||25 };
+  let error;
+  if(EDIT_CID){ ({ error } = await sb.from('classes').update(rec).eq('id', EDIT_CID)); }
+  else { ({ error } = await sb.from('classes').insert(Object.assign({ term_id:TERM.id }, rec))); }
+  if(error){ err.textContent='Could not save class: '+error.message; return; }
+  closeModal('classModal');
+  await loadAll();
+}
+async function deleteClass(id){
+  const c = CLASSES.find(x=>x.id===id); if(!c) return;
+  if(!confirm(`Delete class "${c.name}"? This removes its roster, attendance, and grades for this class. This cannot be undone.`)) return;
+  const { error } = await sb.from('classes').delete().eq('id', id);
+  if(error){ alert('Could not delete: '+error.message); return; }
+  await loadAll();
+}
+
+function openImport(){ el('imp_text').value=''; el('imp_err').textContent=''; el('importModal').classList.add('open'); }
+async function runImport(){
+  const err = el('imp_err'); err.textContent=''; err.style.color='var(--rust)';
+  const text = el('imp_text').value.trim();
+  if(!text){ err.textContent='Paste some rows first.'; return; }
+  const lines = text.split(/\r?\n/).filter(l=>l.trim());
+  const header = lines[0].split(',').map(h=>h.trim().toLowerCase());
+  const need = ['parent_name','phone','email','student_name','grade_level'];
+  if(need.some(h=>!header.includes(h))){ err.textContent='Header must be exactly: '+need.join(','); return; }
+  const idx = {}; need.forEach(h=>idx[h]=header.indexOf(h));
+  let created=0, skipped=0;
+  for(let i=1;i<lines.length;i++){
+    const cols = lines[i].split(',');
+    const pName = (cols[idx.parent_name]||'').trim();
+    const sName = (cols[idx.student_name]||'').trim();
+    if(!pName || !sName){ skipped++; continue; }
+    let parentId = (PARENTS.find(p=>p.name.toLowerCase()===pName.toLowerCase())||{}).id;
+    if(!parentId){
+      const { data, error } = await sb.from('parents').insert({ name:pName, phone:(cols[idx.phone]||'').trim()||null, email:(cols[idx.email]||'').trim()||null }).select('id').single();
+      if(error){ skipped++; continue; }
+      parentId = data.id; PARENTS.push({ id:parentId, name:pName });
+    }
+    const { error:e2 } = await sb.from('students').insert({ parent_id:parentId, name:sName, grade_level:(cols[idx.grade_level]||'').trim()||null, status:'active', custom:{} });
+    if(e2) skipped++; else created++;
+  }
+  closeModal('importModal');
+  await loadAll();
+  alert(`Imported ${created} student(s).` + (skipped?` ${skipped} row(s) skipped.`:''));
+}
+
+// ===== Attendance =====
+function renderAttendance(){
+  const sel = el('att_class');
+  const cls = activeClasses();
+  if(!cls.length){ el('att_roster').innerHTML='<div class="empty">No classes yet. Add one on the Enrollment tab.</div>'; sel.innerHTML=''; return; }
+  const cur = sel.value;
+  sel.innerHTML = cls.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');
+  if(cur && cls.some(c=>c.id===cur)) sel.value = cur;
+  if(!el('att_date').value) el('att_date').value = new Date().toISOString().slice(0,10);
+  loadRoster();
+}
+function rosterFor(classId){
+  if(!TERM) return [];
+  const ids = ENROLLMENTS.filter(e=>e.class_id===classId && e.term_id===TERM.id && e.status==='enrolled').map(e=>e.student_id);
+  return STUDENTS.filter(s=>ids.includes(s.id));
+}
+async function loadRoster(){
+  const classId = el('att_class').value, date = el('att_date').value, box = el('att_roster');
+  if(!classId || !date){ box.innerHTML='<div class="empty">Pick a class and date.</div>'; return; }
+  const roster = rosterFor(classId);
+  if(!roster.length){ box.innerHTML='<div class="empty">No students enrolled in this class. Enrol them on the Enrollment tab.</div>'; return; }
+  const { data } = await sb.from('attendance').select('student_id,status').eq('class_id',classId).eq('date',date);
+  const existing = {}; (data||[]).forEach(r=>existing[r.student_id]=r.status);
+  const opt = (val,cur)=>`<option value="${val}" ${val===cur?'selected':''}>${val.charAt(0).toUpperCase()+val.slice(1)}</option>`;
+  box.innerHTML = `<table><thead><tr><th>Student</th><th>Grade</th><th style="width:150px">Status</th></tr></thead><tbody>${
+    roster.map(s=>{
+      const cur = existing[s.id] || 'present';
+      return `<tr><td><strong>${esc(s.name)}</strong></td><td>${esc(s.grade_level||'—')}</td><td><select class="inline att-status" data-student="${s.id}">${opt('present',cur)}${opt('absent',cur)}${opt('late',cur)}${opt('excused',cur)}</select></td></tr>`;
+    }).join('')
+  }</tbody></table>`;
+}
+function markAll(status){ document.querySelectorAll('#att_roster .att-status').forEach(s=>s.value=status); }
+async function saveAttendance(){
+  const classId = el('att_class').value, date = el('att_date').value;
+  if(!classId || !date){ alert('Pick a class and date first.'); return; }
+  const { data:{ session } } = await sb.auth.getSession();
+  const rows = [...document.querySelectorAll('#att_roster .att-status')].map(s=>({
+    class_id:classId, student_id:s.dataset.student, date, status:s.value, marked_by:session?.user?.id||null
+  }));
+  if(!rows.length){ alert('Nothing to save.'); return; }
+  const { error } = await sb.from('attendance').upsert(rows, { onConflict:'class_id,student_id,date' });
+  if(error){ alert('Could not save: '+error.message); return; }
+  const cls = CLASSES.find(c=>c.id===classId);
+  logAudit('attendance.save', (cls?cls.name:'')+' '+date+' ('+rows.length+' students)');
+  ATT_CACHE = { termId:null, rows:null };
+  await loadAll();
+  el('att_class').value = classId; el('att_date').value = date; loadRoster();
+  alert('Attendance saved.');
+}
+
+// ===== Term management =====
+function renderTerms(){
+  const box = el('termsTable');
+  if(!ALLTERMS.length){ box.innerHTML='<div class="empty">No terms yet. Add one above.</div>'; return; }
+  box.innerHTML = `<table><thead><tr><th>Term</th><th>Dates</th><th>Tuition</th><th>Status</th><th>Actions</th></tr></thead><tbody>${
+    ALLTERMS.map(t=>{
+      const active = t.is_active;
+      let actions = '';
+      if(!active) actions += `<button class="btn btn-primary" onclick="setActiveTerm('${t.id}')">Set active</button> `;
+      if(!active && TERM) actions += `<button class="btn btn-ghost" onclick="copyRoster('${t.id}')">Bring students from active term</button>`;
+      return `<tr><td><strong>${esc(t.label)}</strong></td><td class="sub">${esc(t.start_date||'')} → ${esc(t.end_date||'')}</td><td>${rp(t.tuition_fee_default)}</td><td>${active?'<span class="stamp paid">Active</span>':'<span class="stamp pending">Inactive</span>'}</td><td style="white-space:nowrap">${actions||'<span class="sub">—</span>'}</td></tr>`;
+    }).join('')
+  }</tbody></table>`;
+}
+async function addTerm(){
+  const msg = el('term_msg'); msg.textContent=''; msg.style.color='var(--slate)';
+  const label = el('tm_label').value.trim();
+  if(!label){ msg.style.color='var(--rust)'; msg.textContent='Term label is required.'; return; }
+  const { error } = await sb.from('terms').insert({
+    label, start_date:el('tm_start').value||null, end_date:el('tm_end').value||null,
+    tuition_fee_default:parseInt(el('tm_fee').value)||0, is_active:false
+  });
+  if(error){ msg.style.color='var(--rust)'; msg.textContent='Could not add: '+error.message; return; }
+  el('tm_label').value=''; el('tm_start').value=''; el('tm_end').value=''; el('tm_fee').value='';
+  await loadAll(); renderTerms();
+  msg.style.color='var(--green)'; msg.textContent='Term added.';
+}
+async function setActiveTerm(id){
+  if(!confirm('Make this the active term? The whole app will switch to it.')) return;
+  await sb.from('terms').update({ is_active:false }).neq('id','00000000-0000-0000-0000-000000000000');
+  const { error } = await sb.from('terms').update({ is_active:true }).eq('id', id);
+  if(error){ alert('Could not switch: '+error.message); return; }
+  const t = ALLTERMS.find(x=>x.id===id);
+  logAudit('term.activate', t?.label||'');
+  await loadAll(); renderTerms();
+}
+async function copyRoster(targetId){
+  const source = TERM;
+  if(!source){ alert('No active term to copy from.'); return; }
+  if(source.id===targetId){ alert('Pick a different term.'); return; }
+  if(CLASSES.some(c=>c.term_id===targetId)){
+    if(!confirm('That term already has classes. Copy anyway (may create duplicates)?')) return;
+  }
+  const srcClasses = CLASSES.filter(c=>c.term_id===source.id);
+  if(!srcClasses.length){ alert('The active term has no classes to copy.'); return; }
+  if(!confirm(`Copy ${srcClasses.length} classes and their students into the selected term? Grades/attendance are NOT copied — only class structure and who's enrolled.`)) return;
+
+  const levels = CFG.gradeLevels || ['TK A','TK B','Grade 1','Grade 2','Grade 3','Grade 4','Grade 5','Grade 6'];
+  const promote = confirm('Move students up one grade level? (OK = promote, e.g. Grade 3 → Grade 4 and Grade 6 graduates. Cancel = keep same grade.)');
+  // Given a label, return the next level label, '' if it was the last level, or null if not a recognised level.
+  function nextLevel(label){
+    // longest matching level prefix
+    let best=null; levels.forEach(l=>{ if(String(label||'').startsWith(l) && (!best || l.length>best.length)) best=l; });
+    if(!best) return { changed:false, name:label, graduated:false };
+    const idx = levels.indexOf(best);
+    if(idx === levels.length-1) return { changed:true, name:null, graduated:true }; // last level → graduate
+    const nl = levels[idx+1];
+    return { changed:true, name:(label.startsWith(best) ? nl + label.slice(best.length) : nl), graduated:false, from:best, to:nl };
+  }
+
+  const map = {}; let graduatedClasses=0;
+  for(const c of srcClasses){
+    let newName = c.name;
+    if(promote){
+      const r = nextLevel(c.name);
+      if(r.graduated){ graduatedClasses++; continue; } // don't create a class for graduating cohort
+      if(r.changed && r.name) newName = r.name;
+    }
+    const { data, error } = await sb.from('classes').insert({
+      term_id:targetId, name:newName, teacher_id:c.teacher_id, room:c.room, capacity:c.capacity, schedule:c.schedule
+    }).select('id').single();
+    if(error){ alert('Could not copy class '+c.name+': '+error.message); return; }
+    map[c.id] = data.id;
+  }
+
+  const srcEnroll = ENROLLMENTS.filter(e=>e.term_id===source.id && e.status==='enrolled');
+  const rows = srcEnroll.filter(e=>map[e.class_id]).map(e=>({ student_id:e.student_id, class_id:map[e.class_id], term_id:targetId, status:'enrolled' }));
+  let graduated = srcEnroll.length - rows.length;
+  if(rows.length){
+    const { error } = await sb.from('enrollments').insert(rows);
+    if(error){ alert('Classes copied, but enrollments failed: '+error.message); return; }
+  }
+
+  // If promoting, update each enrolled student's grade_level to match their new class.
+  if(promote){
+    for(const e of srcEnroll){
+      if(!map[e.class_id]) continue; // graduating student, leave as-is
+      const st = STUDENTS.find(x=>x.id===e.student_id);
+      if(st){ const r = nextLevel(st.grade_level); if(r.changed && r.name) await sb.from('students').update({ grade_level:r.name }).eq('id', st.id); }
+    }
+  }
+
+  logAudit('term.rollover', `${rows.length} students${promote?' (promoted)':''}`);
+  await loadAll(); renderTerms();
+  alert(`Copied ${Object.keys(map).length} classes and ${rows.length} enrollments.` + (promote && graduated ? ` ${graduated} student(s) completed the top grade and were not enrolled (graduating).` : '') + ` Set the new term active when ready.`);
+}
+
+// ===== Staff approval =====
+async function renderAudit(){
+  const box = el('auditTable'); if(!box) return;
+  const { data, error } = await sb.from('audit_log').select('*').order('created_at',{ascending:false}).limit(40);
+  if(error){ box.innerHTML='<div class="empty">Activity log not available (run migration_audit_log.sql).</div>'; return; }
+  if(!data || !data.length){ box.innerHTML='<div class="empty">No activity recorded yet.</div>'; return; }
+  box.innerHTML = `<table><thead><tr><th>When</th><th>Who</th><th>Action</th><th>Detail</th></tr></thead><tbody>${
+    data.map(a=>`<tr><td class="sub" style="white-space:nowrap">${new Date(a.created_at).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</td><td class="sub">${esc(a.actor_email||'')}</td><td>${esc(a.action)}</td><td class="sub">${esc(a.detail||'')}</td></tr>`).join('')
+  }</tbody></table>`;
+}
+function renderSettings(){
+  fillConfig();
+  renderTerms();
+  renderAudit();
+  const box = el('staffTable');
+  if(!STAFF.length){ box.innerHTML='<div class="empty">No staff registered yet.</div>'; return; }
+  const badge = s => s==='approved'?'<span class="stamp paid">Approved</span>':s==='pending'?'<span class="stamp pending">Pending</span>':'<span class="stamp overdue">Denied</span>';
+  box.innerHTML = `<table><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Action</th></tr></thead><tbody>${
+    STAFF.map(u=>{
+      let action='';
+      if(u.role!=='owner'){
+        if(u.status==='pending') action=`<button class="btn btn-primary" onclick="setStaff('${u.id}','approved')">Approve</button> <button class="btn btn-ghost" onclick="setStaff('${u.id}','denied')">Deny</button>`;
+        else if(u.status==='approved') action=`<button class="btn btn-ghost" onclick="setStaff('${u.id}','denied')">Revoke</button>`;
+        else action=`<button class="btn btn-primary" onclick="setStaff('${u.id}','approved')">Approve</button>`;
+      } else action='<span class="sub">—</span>';
+      return `<tr><td><strong>${esc(u.name)}</strong></td><td class="sub">${esc(u.email||'')}</td><td>${esc(u.role)}</td><td>${badge(u.status)}</td><td>${action}</td></tr>`;
+    }).join('')
+  }</tbody></table>`;
+}
+async function setStaff(id, status){
+  const { error } = await sb.from('admin_users').update({ status }).eq('id', id);
+  if(error){ alert('Could not update: '+error.message); return; }
+  const u = STAFF.find(x=>x.id===id);
+  logAudit('staff.'+status, u?.name||u?.email||'');
+  await loadAll();
+}
+
+function fillConfig(){
+  const j = k => (Array.isArray(CFG[k]) ? CFG[k].join(', ') : '');
+  el('cfg_name').value = (CFG.branding && CFG.branding.name) || 'Santa Aurelia';
+  el('cfg_tuition').value = TERM ? (TERM.tuition_fee_default||0) : 0;
+  el('cfg_dueday').value = CFG.dueDayDefault || '';
+  el('cfg_followup').value = CFG.followupDays || '';
+  el('cfg_threshold').value = CFG.attendanceThreshold || 80;
+  el('cfg_levels').value = j('gradeLevels') || 'TK A, TK B, Grade 1, Grade 2, Grade 3, Grade 4, Grade 5, Grade 6';
+  el('cfg_grades').value = j('gradeScale') || 'A, B+, B, C, D, E';
+  el('cfg_cats').value = j('incidentCategories') || 'Playground, Behavior, Health, Academic, Other';
+  el('cfg_fees').value = j('feeComponents') || 'Uang Pangkal, Registrasi, Activity Fee, Uang Sekolah, Seragam, Buku, Ekskul, Lomba, Daftar Ulang, Lainnya';
+  el('cfg_msg').textContent='';
+  el('cfg_bankname').value = BANK.name || '';
+  el('cfg_bankacct').value = BANK.account || '';
+  el('cfg_remtpl').value = CFG.waReminderTpl || DEFAULT_REM_TPL;
+  el('cfg_reptpl').value = CFG.waReportTpl || DEFAULT_REP_TPL;
+  el('msg_msg').textContent='';
+}
+async function saveMessages(){
+  const msg = el('msg_msg'); msg.textContent=''; msg.style.color='var(--slate)';
+  const newCfg = Object.assign({}, CFG, {
+    waReminderTpl: el('cfg_remtpl').value.trim() || DEFAULT_REM_TPL,
+    waReportTpl: el('cfg_reptpl').value.trim() || DEFAULT_REP_TPL
+  });
+  const { error } = await sb.from('school_settings').update({
+    config:newCfg, bank_name:el('cfg_bankname').value.trim()||null,
+    bank_account:el('cfg_bankacct').value.trim()||null, updated_at:new Date().toISOString()
+  }).eq('id',1);
+  if(error){ msg.style.color='var(--rust)'; msg.textContent='Could not save: '+error.message; return; }
+  await loadAll();
+  fillConfig();
+  msg.style.color='var(--green)'; msg.textContent='Saved ✓';
+}
+async function saveConfig(){
+  const msg = el('cfg_msg'); msg.textContent=''; msg.style.color='var(--slate)';
+  const list = v => v.split(',').map(x=>x.trim()).filter(Boolean);
+  const newCfg = Object.assign({}, CFG, {
+    branding: Object.assign({}, CFG.branding||{}, { name: el('cfg_name').value.trim() || 'Santa Aurelia' }),
+    dueDayDefault: parseInt(el('cfg_dueday').value)||null,
+    followupDays: parseInt(el('cfg_followup').value)||null,
+    attendanceThreshold: parseInt(el('cfg_threshold').value)||80,
+    gradeLevels: list(el('cfg_levels').value),
+    gradeScale: list(el('cfg_grades').value),
+    incidentCategories: list(el('cfg_cats').value),
+    feeComponents: list(el('cfg_fees').value)
+  });
+  const { error } = await sb.from('school_settings').update({ config:newCfg, updated_at:new Date().toISOString() }).eq('id',1);
+  if(error){ msg.style.color='var(--rust)'; msg.textContent='Could not save: '+error.message; return; }
+  if(TERM){
+    const tuition = parseInt(el('cfg_tuition').value)||0;
+    if(tuition !== Number(TERM.tuition_fee_default||0)){
+      await sb.from('terms').update({ tuition_fee_default:tuition }).eq('id',TERM.id);
+    }
+  }
+  await loadAll();
+  fillConfig();
+  msg.style.color='var(--green)'; msg.textContent='Saved ✓';
+}
+
+// ===== Tuition / invoicing =====
+const DEFAULT_REM_TPL = 'Halo {parent}, ini pengingat pembayaran SPP {term} untuk {students} sebesar {amount}, jatuh tempo {due}. {bank} Terima kasih. — {biz}';
+const DEFAULT_REP_TPL = 'Halo {parent}, laporan {student} {term}: Nilai {grade}, kehadiran {attendance}. {comment} — {biz}';
+function applyTpl(tpl, map){ return String(tpl||'').replace(/\{(\w+)\}/g, (m,k)=> map[k]!=null ? map[k] : ''); }
+function bankLine(){ if(!BANK.name && !BANK.account) return ''; return `Pembayaran: ${BANK.name}${BANK.account?' '+BANK.account:''}.`; }
+function bizName(){ return (CFG.branding && CFG.branding.name) || 'Santa Aurelia'; }
+function waPhone(p){ if(!p) return ''; let d=String(p).replace(/\D/g,''); if(d.startsWith('0')) d='62'+d.slice(1); else if(!d.startsWith('62')) d='62'+d; return d; }
+
+function feeComponents(){ return CFG.feeComponents || ['Uang Pangkal','Registrasi','Activity Fee','Uang Sekolah','Seragam','Buku','Ekskul','Lomba','Daftar Ulang','Lainnya']; }
+function invStatus(inv){
+  if(inv.status==='void') return 'void';
+  const total=Number(inv.amount||0), paid=Number(inv.paid_amount||0);
+  if(paid<=0) return 'unpaid';
+  if(paid>=total) return 'paid';
+  return 'partial';
+}
+function statusBadge(inv, overdue){
+  const s = invStatus(inv);
+  if(s==='paid') return '<span class="stamp paid">Lunas</span>';
+  if(s==='void') return '<span class="stamp pending">Batal</span>';
+  if(s==='partial') return '<span class="stamp pending">Sebagian</span>';
+  return overdue ? '<span class="stamp overdue">Terlambat</span>' : '<span class="stamp pending">Belum Bayar</span>';
+}
+function renderTuition(){
+  const box = el('tuitionTable');
+  if(!INVOICES.length){ box.innerHTML='<div class="empty">Belum ada invoice. Klik “Buat Invoice” atau “Generate Uang Sekolah”.</div>'; return; }
+  const today = new Date().toISOString().slice(0,10);
+  const sorted = [...INVOICES].sort((a,b)=>(a.due_date||'').localeCompare(b.due_date||''));
+  box.innerHTML = `<table><thead><tr><th>Keluarga</th><th>Rincian</th><th>Total</th><th>Terbayar</th><th>Sisa</th><th>Status</th><th>Aksi</th></tr></thead><tbody>${
+    sorted.map(i=>{
+      const overdue = invStatus(i)!=='paid' && i.status!=='void' && i.due_date && i.due_date < today;
+      const paid = Number(i.paid_amount||0), remain = Math.max(0, Number(i.amount||0)-paid);
+      const items = Array.isArray(i.items)&&i.items.length ? i.items.map(x=>x.label).join(', ') : (i.note||'—');
+      return `<tr><td><strong>${esc(i.parents?.name||'Unknown')}</strong></td><td class="sub">${esc(items)}</td><td>${rp(i.amount)}</td><td>${rp(paid)}</td><td>${rp(remain)}</td><td>${statusBadge(i,overdue)}</td><td style="white-space:nowrap"><button class="btn btn-primary" onclick="manageInvoice('${i.id}')">Kelola</button> <button class="btn btn-ghost" onclick="waReminder('${i.id}')">WA</button> <button class="btn btn-ghost" onclick="pdfInvoice('${i.id}')">PDF</button></td></tr>`;
+    }).join('')
+  }</tbody></table>`;
+}
+
+// Bulk: one Uang Sekolah invoice per enrolled family
+async function generateInvoices(){
+  if(!TERM){ alert('Belum ada term aktif. Buat di Settings dulu.'); return; }
+  const fee = Number(TERM.tuition_fee_default||0) || 2400000;
+  const byParent = {};
+  ENROLLMENTS.filter(e=>e.term_id===TERM.id && e.status==='enrolled').forEach(e=>{
+    const st = STUDENTS.find(s=>s.id===e.student_id); if(!st) return;
+    byParent[st.parent_id] = byParent[st.parent_id] || { names:[], count:0 };
+    byParent[st.parent_id].names.push(st.name); byParent[st.parent_id].count++;
+  });
+  const dueDay = CFG.dueDayDefault; let due;
+  if(dueDay){ const d=new Date(); d.setMonth(d.getMonth()+1); d.setDate(dueDay); due=d.toISOString().slice(0,10); }
+  else due = new Date(Date.now()+14*86400000).toISOString().slice(0,10);
+  const rows = [];
+  Object.keys(byParent).forEach(pid=>{
+    if(INVOICES.some(i=>i.parent_id===pid && i.term_id===TERM.id)) return;
+    const amt = fee * byParent[pid].count;
+    rows.push({ parent_id:pid, term_id:TERM.id, amount:amt, paid_amount:0,
+      items:[{label:'Uang Sekolah', amount:amt}], payments:[], due_date:due, status:'unpaid', note:byParent[pid].names.join(', ') });
+  });
+  if(!rows.length){ alert('Tidak ada invoice baru — semua keluarga terdaftar sudah punya invoice term ini.'); return; }
+  if(!confirm(`Buat ${rows.length} invoice Uang Sekolah @ ${rp(fee)} per siswa, jatuh tempo ${due}?`)) return;
+  const { error } = await sb.from('invoices').insert(rows);
+  if(error){ alert('Gagal: '+error.message); return; }
+  logAudit('invoice.bulk', rows.length+' uang sekolah');
+  await loadAll();
+  alert(`${rows.length} invoice dibuat.`);
+}
+
+// Build a custom itemized invoice
+function openBuildInvoice(){
+  el('bi_err').textContent='';
+  el('bi_parent').innerHTML = PARENTS.slice().sort((a,b)=>a.name.localeCompare(b.name)).map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join('') || '<option value="">Belum ada keluarga</option>';
+  el('bi_items').innerHTML = feeComponents().map(f=>`<div style="display:flex;align-items:center;gap:10px;margin-top:8px"><label style="flex:1;margin:0;text-transform:none;font-size:13px;color:var(--ink)">${esc(f)}</label><input data-fee="${esc(f)}" type="number" placeholder="0" style="width:150px;padding:8px 10px;border:1px solid var(--hairline);border-radius:var(--radius)"></div>`).join('');
+  const dueDay = CFG.dueDayDefault; let due;
+  if(dueDay){ const d=new Date(); d.setMonth(d.getMonth()+1); d.setDate(dueDay); due=d.toISOString().slice(0,10); }
+  else due = new Date(Date.now()+14*86400000).toISOString().slice(0,10);
+  el('bi_due').value = due;
+  el('buildModal').classList.add('open');
+}
+async function saveInvoice(){
+  const err = el('bi_err'); err.textContent='';
+  const pid = el('bi_parent').value;
+  if(!pid){ err.textContent='Pilih keluarga.'; return; }
+  const items = [];
+  document.querySelectorAll('#bi_items [data-fee]').forEach(inp=>{ const v=parseInt(inp.value)||0; if(v>0) items.push({ label:inp.dataset.fee, amount:v }); });
+  if(!items.length){ err.textContent='Isi minimal satu komponen biaya.'; return; }
+  const total = items.reduce((s,x)=>s+x.amount,0);
+  const p = PARENTS.find(x=>x.id===pid) || {};
+  const { error } = await sb.from('invoices').insert({
+    parent_id:pid, term_id:TERM?TERM.id:null, amount:total, paid_amount:0,
+    items, payments:[], due_date:el('bi_due').value||null, status:'unpaid', note:p.name||''
+  });
+  if(error){ err.textContent='Gagal: '+error.message; return; }
+  logAudit('invoice.create', (p.name||'')+' '+rp(total));
+  closeModal('buildModal');
+  await loadAll();
+}
+
+// Manage: view items, add items, record installment payments, void
+let MANAGE_ID = null;
+function manageInvoice(id){
+  MANAGE_ID = id;
+  renderManage();
+  el('manageModal').classList.add('open');
+}
+function renderManage(){
+  const i = INVOICES.find(x=>x.id===MANAGE_ID); if(!i) return;
+  el('mi_family').textContent = (i.parents?.name||'') + ' · ' + (i.due_date||'');
+  const paid = Number(i.paid_amount||0), total = Number(i.amount||0), remain = Math.max(0,total-paid);
+  const items = Array.isArray(i.items)?i.items:[];
+  const pays = Array.isArray(i.payments)?i.payments:[];
+  const feeOpts = feeComponents().map(f=>`<option>${esc(f)}</option>`).join('');
+  el('mi_body').innerHTML = `
+    <div class="d-sec"><h3>Rincian</h3>
+      ${items.length ? items.map(x=>`<div class="d-row"><span class="k">${esc(x.label)}</span><span>${rp(x.amount)}</span></div>`).join('') : '<div class="d-empty">Belum ada komponen.</div>'}
+      <div class="d-row" style="border:none;font-weight:600"><span>Total</span><span>${rp(total)}</span></div>
+      <div class="d-row" style="border:none"><span class="k">Terbayar</span><span>${rp(paid)}</span></div>
+      <div class="d-row" style="border:none;font-weight:600;color:${remain>0?'var(--rust)':'var(--green)'}"><span>Sisa</span><span>${rp(remain)}</span></div>
+    </div>
+    <div class="d-sec"><h3>Tambah komponen</h3>
+      <div style="display:flex;gap:8px">
+        <select id="mi_fee" class="inline" style="flex:1;max-width:none">${feeOpts}</select>
+        <input id="mi_amt" type="number" placeholder="Jumlah" style="width:130px;padding:8px 10px;border:1px solid var(--hairline);border-radius:var(--radius)">
+        <button class="btn btn-ghost" onclick="addInvoiceItem()">Tambah</button>
+      </div>
+    </div>
+    <div class="d-sec"><h3>Catat pembayaran (cicilan)</h3>
+      <div style="display:flex;gap:8px">
+        <input id="mi_pay" type="number" placeholder="Jumlah diterima" style="flex:1;padding:8px 10px;border:1px solid var(--hairline);border-radius:var(--radius)">
+        <button class="btn btn-primary" onclick="recordPayment()">Catat</button>
+      </div>
+      ${pays.length ? '<div style="margin-top:10px">'+pays.map(p=>`<div class="d-row"><span class="k">${esc(p.date)}</span><span>${rp(p.amount)}</span></div>`).join('')+'</div>' : ''}
+    </div>
+    ${i.status!=='void' ? `<button class="btn btn-ghost" onclick="voidInvoice()">Batalkan invoice</button>` : '<div class="d-empty">Invoice dibatalkan.</div>'}`;
+}
+async function addInvoiceItem(){
+  const i = INVOICES.find(x=>x.id===MANAGE_ID); if(!i) return;
+  const amt = parseInt(el('mi_amt').value)||0;
+  if(amt<=0){ alert('Isi jumlah.'); return; }
+  const items = (Array.isArray(i.items)?i.items:[]).concat([{ label:el('mi_fee').value, amount:amt }]);
+  const total = items.reduce((s,x)=>s+x.amount,0);
+  const status = Number(i.paid_amount||0)>=total ? 'paid' : (Number(i.paid_amount||0)>0?'partial':'unpaid');
+  const { error } = await sb.from('invoices').update({ items, amount:total, status }).eq('id',MANAGE_ID);
+  if(error){ alert('Gagal: '+error.message); return; }
+  await loadAll(); renderManage();
+}
+async function recordPayment(){
+  const i = INVOICES.find(x=>x.id===MANAGE_ID); if(!i) return;
+  const amt = parseInt(el('mi_pay').value)||0;
+  if(amt<=0){ alert('Isi jumlah pembayaran.'); return; }
+  const paid = Number(i.paid_amount||0)+amt;
+  const pays = (Array.isArray(i.payments)?i.payments:[]).concat([{ date:new Date().toISOString().slice(0,10), amount:amt }]);
+  const total = Number(i.amount||0);
+  const status = paid>=total ? 'paid' : (paid>0?'partial':'unpaid');
+  const { error } = await sb.from('invoices').update({ paid_amount:paid, payments:pays, status, paid_at: status==='paid'?new Date().toISOString():null }).eq('id',MANAGE_ID);
+  if(error){ alert('Gagal: '+error.message); return; }
+  logAudit('invoice.payment', (i.parents?.name||'')+' '+rp(amt));
+  await loadAll(); renderManage();
+}
+async function voidInvoice(){
+  if(!confirm('Batalkan invoice ini?')) return;
+  const { error } = await sb.from('invoices').update({ status:'void' }).eq('id',MANAGE_ID);
+  if(error){ alert('Gagal: '+error.message); return; }
+  await loadAll(); renderManage();
+}
+
+function waReminder(id){
+  const i = INVOICES.find(x=>x.id===id); if(!i) return;
+  const phone = waPhone(i.parents?.phone);
+  if(!phone){ alert('No phone number on file for this family. Add one on the Enrollment tab.'); return; }
+  const remain = Math.max(0, Number(i.amount||0)-Number(i.paid_amount||0));
+  const msg = applyTpl(CFG.waReminderTpl || DEFAULT_REM_TPL, {
+    parent:i.parents?.name||'', students:i.note||'siswa', amount:rp(remain),
+    due:i.due_date||'-', term:TERM?TERM.label:'', bank:bankLine(), biz:bizName()
+  });
+  window.open('https://wa.me/'+phone+'?text='+encodeURIComponent(msg), '_blank');
+}
+
+function pdfInvoice(id){
+  const i = INVOICES.find(x=>x.id===id); if(!i) return;
+  const w = window.open('', '_blank');
+  const paid = Number(i.paid_amount||0), total = Number(i.amount||0), remain = Math.max(0,total-paid);
+  const isPaid = remain<=0;
+  const items = Array.isArray(i.items)&&i.items.length ? i.items : [{label:i.note||'Biaya', amount:total}];
+  const itemRows = items.map(x=>`<tr><td>${esc(x.label)}</td><td style="text-align:right">${rp(x.amount)}</td></tr>`).join('');
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Invoice ${esc(i.parents?.name||'')}</title>
+  <style>body{font-family:Georgia,serif;color:#1B2A4A;max-width:640px;margin:40px auto;padding:0 24px}
+  .head{display:flex;justify-content:space-between;border-bottom:2px solid #1B2A4A;padding-bottom:16px;margin-bottom:24px}
+  h1{font-size:24px;margin:0} .sub{color:#6B7280;font-size:13px}
+  .stamp{display:inline-block;border:2px dashed ${isPaid?'#2F5D50':'#B5502D'};color:${isPaid?'#2F5D50':'#B5502D'};padding:4px 14px;border-radius:20px;font-size:13px;font-weight:bold;transform:rotate(-4deg);text-transform:uppercase}
+  table{width:100%;border-collapse:collapse;margin:20px 0} td,th{text-align:left;padding:9px 0;border-bottom:1px solid #d9d4c7;font-size:14px}
+  .tot td{font-weight:bold;font-size:16px;border-top:2px solid #1B2A4A} .foot{color:#6B7280;font-size:12px;margin-top:40px;border-top:1px solid #d9d4c7;padding-top:12px}</style></head>
+  <body>
+  <div class="head"><div><h1>${esc(bizName())}</h1><div class="sub">Invoice · ${esc(TERM?TERM.label:'')}</div></div><div class="stamp">${isPaid?'Lunas':'Belum Lunas'}</div></div>
+  <div style="margin-bottom:8px"><strong>Keluarga:</strong> ${esc(i.parents?.name||'')} &nbsp;·&nbsp; <strong>Jatuh tempo:</strong> ${esc(i.due_date||'-')}</div>
+  <table>
+    <tr><th>Komponen</th><th style="text-align:right">Jumlah</th></tr>
+    ${itemRows}
+    <tr class="tot"><td>Total</td><td style="text-align:right">${rp(total)}</td></tr>
+    <tr><td>Terbayar</td><td style="text-align:right">${rp(paid)}</td></tr>
+    <tr><td><strong>Sisa</strong></td><td style="text-align:right"><strong>${rp(remain)}</strong></td></tr>
+  </table>
+  <div class="foot">Mohon diselesaikan sebelum jatuh tempo.${(BANK.name||BANK.account)?' Pembayaran: '+esc(BANK.name)+(BANK.account?' '+esc(BANK.account):'')+'.':''} — ${esc(bizName())}</div>
+  <script>window.onload=function(){window.print()}<\/script>
+  </body></html>`);
+  w.document.close();
+}
+
+// ===== Grades & report cards =====
+let GRADEMAP = {};
+function renderGrades(){
+  const sel = el('gr_class');
+  const cls = activeClasses();
+  if(!cls.length){ el('gradeSheet').innerHTML='<div class="empty">No classes yet.</div>'; sel.innerHTML=''; return; }
+  const cur = sel.value;
+  sel.innerHTML = cls.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');
+  if(cur && cls.some(c=>c.id===cur)) sel.value = cur;
+  loadGradeSheet();
+}
+async function loadGradeSheet(){
+  const classId = el('gr_class').value, box = el('gradeSheet');
+  if(!classId || !TERM){ box.innerHTML='<div class="empty">Pilih kelas.</div>'; return; }
+  const roster = rosterFor(classId);
+  if(!roster.length){ box.innerHTML='<div class="empty">Belum ada siswa di kelas ini.</div>'; return; }
+  const { data } = await sb.from('grades').select('*').eq('class_id',classId).eq('term_id',TERM.id).eq('assessment','Term grade');
+  GRADEMAP = {}; (data||[]).forEach(g=>GRADEMAP[g.student_id]=g);
+  const cls = CLASSES.find(c=>c.id===classId);
+  const narrative = /^(TK|PG|KB|Kelompok|Play)/i.test(cls?cls.name:'');
+  if(narrative){
+    // Preschool/kindergarten: descriptive report, no numbers
+    box.innerHTML = `<p style="color:var(--slate);font-size:13px;margin-bottom:12px">Kelas TK/PG — tulis penilaian naratif (tanpa angka).</p><table><thead><tr><th style="width:180px">Siswa</th><th>Penilaian (narasi)</th></tr></thead><tbody>${
+      roster.map(s=>{
+        const g = GRADEMAP[s.id] || {};
+        return `<tr data-student="${s.id}" data-gid="${g.id||''}" data-narrative="1"><td style="vertical-align:top;padding-top:14px"><strong>${esc(s.name)}</strong></td><td><textarea class="gr-narr" placeholder="Perkembangan anak, sikap, capaian…" style="width:100%;min-height:90px;padding:10px 12px;border:1px solid var(--hairline);border-radius:var(--radius);font-family:var(--sans);font-size:14px;resize:vertical">${esc(g.comment||'')}</textarea></td></tr>`;
+      }).join('')
+    }</tbody></table>`;
+    return;
+  }
+  const scale = CFG.gradeScale || ['A','B+','B','C','D','E'];
+  const labelOpts = cur => ['<option value="">—</option>'].concat(scale.map(l=>`<option ${l===cur?'selected':''}>${esc(l)}</option>`)).join('');
+  box.innerHTML = `<table><thead><tr><th>Siswa</th><th style="width:90px">Nilai</th><th style="width:90px">Grade</th><th>Catatan</th><th>Rapor</th></tr></thead><tbody>${
+    roster.map(s=>{
+      const g = GRADEMAP[s.id] || {};
+      return `<tr data-student="${s.id}" data-gid="${g.id||''}">
+        <td><strong>${esc(s.name)}</strong></td>
+        <td><input class="gr-score" type="number" step="0.01" value="${g.score!=null?g.score:''}" style="width:78px;padding:6px 8px;border:1px solid var(--hairline);border-radius:var(--radius)"></td>
+        <td><select class="gr-label inline" style="max-width:80px">${labelOpts(g.label||'')}</select></td>
+        <td><input class="gr-comment" value="${esc(g.comment||'')}" placeholder="opsional" style="width:100%;padding:6px 8px;border:1px solid var(--hairline);border-radius:var(--radius)"></td>
+        <td><button class="btn btn-ghost" onclick="reportCard('${s.id}')">Rapor</button></td>
+      </tr>`;
+    }).join('')
+  }</tbody></table>`;
+}
+async function saveGrades(){
+  const classId = el('gr_class').value;
+  if(!classId || !TERM){ alert('Pilih kelas dulu.'); return; }
+  const { data:{ session } } = await sb.auth.getSession();
+  const rows = [...document.querySelectorAll('#gradeSheet tr[data-student]')];
+  const inserts = [], updates = [];
+  rows.forEach(tr=>{
+    const sid = tr.dataset.student, gid = tr.dataset.gid, narrative = tr.dataset.narrative;
+    let score=null, label=null, comment=null;
+    if(narrative){
+      comment = tr.querySelector('.gr-narr').value.trim();
+      if(!comment) return;
+    } else {
+      const sc = tr.querySelector('.gr-score').value;
+      label = tr.querySelector('.gr-label').value || null;
+      comment = tr.querySelector('.gr-comment').value.trim() || null;
+      score = sc===''?null:Number(sc);
+      if(score===null && !label && !comment) return;
+    }
+    const rec = { student_id:sid, class_id:classId, term_id:TERM.id, assessment:'Term grade', score, label, comment, entered_by:session?.user?.id||null };
+    if(gid) updates.push({ id:gid, ...rec }); else inserts.push(rec);
+  });
+  let err=null;
+  if(inserts.length){ const r=await sb.from('grades').insert(inserts); err=err||r.error; }
+  for(const u of updates){ const {id,...rest}=u; const r=await sb.from('grades').update(rest).eq('id',id); err=err||r.error; }
+  if(err){ alert('Gagal menyimpan: '+err.message); return; }
+  const cls = CLASSES.find(c=>c.id===classId);
+  logAudit('grades.save', cls?cls.name:'');
+  await loadGradeSheet();
+  alert('Nilai tersimpan.');
+}
+
+async function reportCard(sid){
+  if(!TERM){ alert('No active term.'); return; }
+  const stu = STUDENTS.find(s=>s.id===sid); if(!stu) return;
+  const parent = PARENTS.find(p=>p.id===stu.parent_id) || {};
+  const cid = classOfStudent(sid);
+  const cls = CLASSES.find(c=>c.id===cid);
+  const { data:grades } = await sb.from('grades').select('*').eq('student_id',sid).eq('term_id',TERM.id);
+  const { data:att } = await sb.from('attendance').select('status').eq('student_id',sid).gte('date',TERM.start_date).lte('date',TERM.end_date);
+  const present = (att||[]).filter(a=>a.status==='present'||a.status==='late').length;
+  const rate = (att&&att.length) ? Math.round(present/att.length*100) : null;
+  const g = (grades||[]).find(x=>x.assessment==='Term grade') || (grades||[])[0] || {};
+  const gradeLine = g.label ? `${g.label}${g.score!=null?` (${g.score})`:''}` : (g.score!=null?String(g.score):(g.comment?'(lihat catatan)':'—'));
+
+  const w = window.open('', '_blank');
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Report card — ${esc(stu.name)}</title>
+  <style>body{font-family:Georgia,serif;color:#1B2A4A;max-width:640px;margin:40px auto;padding:0 24px}
+  .head{text-align:center;border-bottom:2px solid #1B2A4A;padding-bottom:16px;margin-bottom:24px}
+  h1{font-size:26px;margin:0} .sub{color:#6B7280;font-size:13px;margin-top:4px}
+  table{width:100%;border-collapse:collapse;margin:20px 0} th,td{text-align:left;padding:12px 0;border-bottom:1px solid #d9d4c7;font-size:15px} th{color:#6B7280;font-weight:normal;width:40%}
+  .big{font-size:22px;font-weight:bold} .comment{background:#F6F4EF;border-left:3px solid #B08D57;padding:12px 16px;margin-top:8px;font-size:14px;font-style:italic}
+  .foot{color:#6B7280;font-size:12px;margin-top:40px;border-top:1px solid #d9d4c7;padding-top:12px;text-align:center}</style></head>
+  <body>
+  <div class="head"><h1>${esc(bizName())}</h1><div class="sub">Report Card · ${esc(TERM.label)}</div></div>
+  <table>
+    <tr><th>Student</th><td><strong>${esc(stu.name)}</strong></td></tr>
+    <tr><th>Class</th><td>${esc(cls?cls.name:(stu.grade_level||'—'))}</td></tr>
+    <tr><th>Grade</th><td class="big">${esc(gradeLine)}</td></tr>
+    <tr><th>Attendance</th><td>${rate!=null?rate+'%':'No records'}</td></tr>
+  </table>
+  ${g.comment?`<div><th style="color:#6B7280;font-size:13px">Teacher's comment</th><div class="comment">${esc(g.comment)}</div></div>`:''}
+  <div class="foot">Issued by ${esc(bizName())}. For questions, please contact the school office.</div>
+  <script>window.onload=function(){window.print()}<\/script>
+  </body></html>`);
+  w.document.close();
+
+  const phone = waPhone(parent.phone);
+  if(phone && confirm('Also send a summary to the parent on WhatsApp?')){
+    const msg = applyTpl(CFG.waReportTpl || DEFAULT_REP_TPL, {
+      parent:parent.name||'', student:stu.name, grade:gradeLine,
+      attendance:(rate!=null?rate+'%':'-'), comment:g.comment||'', term:TERM.label, biz:bizName()
+    });
+    window.open('https://wa.me/'+phone+'?text='+encodeURIComponent(msg), '_blank');
+  }
+}
+
+// ===== Incident log =====
+async function renderIncidentsTab(){
+  const box = el('incidentsFull');
+  const { data } = await sb.from('incidents').select('*, students(name)').order('created_at',{ascending:false});
+  const list = data || [];
+  if(!list.length){ box.innerHTML='<div class="empty">No incidents logged. Click “Log incident” to add one.</div>'; return; }
+  const stampFor = s => s==='resolved'?'<span class="stamp paid">Resolved</span>':s==='follow-up'?'<span class="stamp pending">Follow-up</span>':'<span class="stamp overdue">Open</span>';
+  box.innerHTML = `<table><thead><tr><th>Date</th><th>Student</th><th>Category</th><th>Description</th><th>Status</th><th>Action</th></tr></thead><tbody>${
+    list.map(i=>{
+      let next='';
+      if(i.status==='open') next=`<button class="btn btn-ghost" onclick="setIncident('${i.id}','follow-up')">Follow-up</button> <button class="btn btn-primary" onclick="setIncident('${i.id}','resolved')">Resolve</button>`;
+      else if(i.status==='follow-up') next=`<button class="btn btn-primary" onclick="setIncident('${i.id}','resolved')">Resolve</button>`;
+      else next=`<button class="btn btn-ghost" onclick="setIncident('${i.id}','open')">Reopen</button>`;
+      return `<tr><td class="sub" style="white-space:nowrap">${new Date(i.created_at).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}</td><td><strong>${esc(i.students?.name||'—')}</strong></td><td>${i.category?`<span class="incident-cat">${esc(i.category)}</span>`:'—'}</td><td>${esc(i.description)}</td><td>${stampFor(i.status)}</td><td style="white-space:nowrap">${next}</td></tr>`;
+    }).join('')
+  }</tbody></table>`;
+}
+function openAddIncident(){
+  el('im_desc').value=''; el('im_err').textContent='';
+  el('im_student').innerHTML = STUDENTS.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join('') || '<option value="">No students</option>';
+  const cats = CFG.incidentCategories || ['Playground','Behavior','Health','Academic','Other'];
+  el('im_category').innerHTML = cats.map(c=>`<option>${esc(c)}</option>`).join('');
+  el('incidentModal').classList.add('open');
+}
+async function saveIncident(){
+  const err = el('im_err'); err.textContent='';
+  const sid = el('im_student').value, desc = el('im_desc').value.trim();
+  if(!sid){ err.textContent='Pick a student.'; return; }
+  if(!desc){ err.textContent='Describe what happened.'; return; }
+  const { data:{ session } } = await sb.auth.getSession();
+  const { error } = await sb.from('incidents').insert({ student_id:sid, category:el('im_category').value, description:desc, status:'open', reported_by:session?.user?.id||null });
+  if(error){ err.textContent='Could not save: '+error.message; return; }
+  closeModal('incidentModal');
+  await loadAll();
+  renderIncidentsTab();
+}
+async function setIncident(id, status){
+  const patch = { status };
+  patch.resolved_at = status==='resolved' ? new Date().toISOString() : null;
+  const { error } = await sb.from('incidents').update(patch).eq('id', id);
+  if(error){ alert('Could not update: '+error.message); return; }
+  await loadAll();
+  renderIncidentsTab();
+}
+
+// ===== Connection check =====
+async function pingConnection(){
+  const e = el('loginErr'); e.style.color='var(--slate)'; e.textContent='Checking database connection…';
+  try{
+    const r = await fetch(SUPABASE_URL + '/rest/v1/', { headers:{ apikey:SUPABASE_ANON_KEY } });
+    if(r.ok || r.status===400 || r.status===401){ e.style.color='var(--green)'; e.textContent='Connected ✓  You can sign in.'; }
+    else { e.style.color='var(--rust)'; e.textContent='Database status '+r.status; }
+  }catch(ex){ e.style.color='var(--rust)'; e.textContent='Cannot reach database: '+ex.message; }
+}
+
+// ===== Boot =====
+checkAuthState();
+setTimeout(()=>{ if(el('login').style.display!=='none') pingConnection(); }, 300);
+</script>
+</body>
+</html>
