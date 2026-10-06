@@ -57,8 +57,9 @@
     <label>Email</label><input id="t_email" type="email" autocomplete="username">
     <label>Password</label><input id="t_pass" type="password" autocomplete="current-password">
     <button class="btn" id="authBtn">Sign in</button>
-    <button class="link" id="toggleMode">New here? Create an account</button>
-    <div class="msg" id="authMsg"></div>
+    <button class="link" id="toggleMode" type="button">New here? Create an account</button>
+    <button class="link" id="resendConfirm" type="button" style="display:none">Resend verification email</button>
+    <div class="msg" id="authMsg" role="status" aria-live="polite"></div>
   </div>
 
   <!-- APP -->
@@ -89,6 +90,7 @@
 <script>
 const SUPABASE_URL = 'https://gthlpszvpvtoqkodbeaa.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_IKmG6K1F7mKEDEb7jh3CtA_bwi86Tk3';
+const TEACHER_PORTAL_URL = 'https://santa-aurelia.vercel.app/teacher.html';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const el = id => document.getElementById(id);
 const esc = s => (s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -113,6 +115,7 @@ el('toggleMode').addEventListener('click', ()=>{
   el('nameRow').style.display = SIGNUP?'block':'none';
   el('authBtn').textContent = SIGNUP?'Create account':'Sign in';
   el('toggleMode').textContent = SIGNUP?'Have an account? Sign in':'New here? Create an account';
+  el('resendConfirm').style.display='none';
   el('authMsg').textContent='';
 });
 
@@ -123,20 +126,39 @@ el('authBtn').addEventListener('click', async ()=>{
   if(SIGNUP){
     const name = el('t_name').value.trim();
     if(!name){ msg.style.color='var(--rust)'; msg.textContent='Enter your name.'; return; }
-    const { data, error } = await sb.auth.signUp({ email, password:pass });
+    const { error } = await sb.auth.signUp({
+      email,
+      password:pass,
+      options:{
+        data:{ name, account_role:'teacher' },
+        emailRedirectTo:TEACHER_PORTAL_URL
+      }
+    });
     if(error){ msg.style.color='var(--rust)'; msg.textContent=error.message; return; }
-    const uid = data.user?.id;
-    if(uid){
-      const { error:e2 } = await sb.from('admin_users').insert({ id:uid, email, name, role:'teacher', status:'pending' });
-      if(e2 && !e2.message.includes('duplicate')){ msg.style.color='var(--rust)'; msg.textContent=e2.message; return; }
-    }
-    msg.style.color='var(--green)'; msg.textContent='Account created. Waiting for approval.';
-    setTimeout(boot, 800);
+    msg.style.color='var(--green)';
+    msg.textContent='Account created. Check your email and click the verification link, then return here to sign in.';
+    el('resendConfirm').style.display='block';
   } else {
     const { error } = await sb.auth.signInWithPassword({ email, password:pass });
     if(error){ msg.style.color='var(--rust)'; msg.textContent=error.message; return; }
     boot();
   }
+});
+el('resendConfirm').addEventListener('click', async ()=>{
+  const msg = el('authMsg');
+  const email = el('t_email').value.trim();
+  if(!email){ msg.style.color='var(--rust)'; msg.textContent='Enter your email address first.'; return; }
+  const button = el('resendConfirm');
+  button.disabled=true;
+  msg.style.color='var(--slate)'; msg.textContent='Sending a new verification email…';
+  const { error } = await sb.auth.resend({
+    type:'signup', email,
+    options:{ emailRedirectTo:TEACHER_PORTAL_URL }
+  });
+  button.disabled=false;
+  if(error){ msg.style.color='var(--rust)'; msg.textContent=error.message; return; }
+  msg.style.color='var(--green)';
+  msg.textContent='A new verification email was sent. Use only the newest link.';
 });
 el('t_out').addEventListener('click', async ()=>{ await sb.auth.signOut(); location.reload(); });
 
@@ -256,4 +278,3 @@ boot();
 </script>
 </body>
 </html>
-
