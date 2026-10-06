@@ -87,8 +87,8 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const SUPABASE_URL = 'https://ltparcxjrbsibbxoyohx.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx0cGFyY3hqcmJzaWJieG95b2h4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI4ODY5NjAsImV4cCI6MjA5ODQ2Mjk2MH0.5-9OBlQ36eQBJ-noGDIC5dYKmn4WKhFzACwiCTFOtgY';
+const SUPABASE_URL = 'https://gthlpszvpvtoqkodbeaa.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_IKmG6K1F7mKEDEb7jh3CtA_bwi86Tk3';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const el = id => document.getElementById(id);
 const esc = s => (s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -127,7 +127,7 @@ el('authBtn').addEventListener('click', async ()=>{
     if(error){ msg.style.color='var(--rust)'; msg.textContent=error.message; return; }
     const uid = data.user?.id;
     if(uid){
-      const { error:e2 } = await sb.from('admin_users').insert({ id:uid, email, name, role:'admin', status:'pending' });
+      const { error:e2 } = await sb.from('admin_users').insert({ id:uid, email, name, role:'teacher', status:'pending' });
       if(e2 && !e2.message.includes('duplicate')){ msg.style.color='var(--rust)'; msg.textContent=e2.message; return; }
     }
     msg.style.color='var(--green)'; msg.textContent='Account created. Waiting for approval.';
@@ -143,9 +143,15 @@ el('t_out').addEventListener('click', async ()=>{ await sb.auth.signOut(); locat
 async function boot(){
   const { data:{ session } } = await sb.auth.getSession();
   if(!session){ el('auth').style.display='block'; el('tapp').style.display='none'; return; }
-  const { data:me } = await sb.from('admin_users').select('name,role,status').eq('id',session.user.id).maybeSingle();
+  const { data:me } = await sb.from('admin_users').select('id,name,role,status').eq('id',session.user.id).maybeSingle();
   if(!me){ el('auth').style.display='block'; el('authMsg').style.color='var(--rust)'; el('authMsg').textContent='No staff record. Create an account.'; return; }
-  ME = { id:session.user.id, ...me };
+  if(me.role!=='teacher'){
+    await sb.auth.signOut();
+    el('auth').style.display='block'; el('tapp').style.display='none';
+    el('authMsg').style.color='var(--rust)'; el('authMsg').textContent='This app is for approved teacher accounts only.';
+    return;
+  }
+  ME = me;
   el('auth').style.display='none'; el('tapp').style.display='block';
   el('t_who').textContent = me.name;
   if(me.status!=='approved'){ el('pendingBox').style.display='block'; el('markArea').style.display='none'; return; }
@@ -156,10 +162,20 @@ async function boot(){
 async function loadClasses(){
   const term = await sb.from('terms').select('*').eq('is_active',true).limit(1).maybeSingle();
   TERM = term.data || null;
-  const { data } = await sb.from('classes').select('*').order('name');
-  // show classes this teacher teaches; if none assigned, show all (small school)
-  const mine = (data||[]).filter(c=>c.teacher_id===ME.id);
-  MYCLASSES = mine.length ? mine : (data||[]);
+  if(!TERM){
+    MYCLASSES=[]; ROSTER=[];
+    el('m_class').innerHTML='';
+    el('roster').innerHTML='<div class="empty">No active school term has been set yet.</div>';
+    return;
+  }
+  const { data, error } = await sb.from('classes').select('*').eq('teacher_id',ME.id).eq('term_id',TERM.id).order('name');
+  if(error){
+    MYCLASSES=[]; ROSTER=[];
+    el('m_class').innerHTML='';
+    el('roster').innerHTML='<div class="empty">Could not load your class assignments. Please contact the school office.</div>';
+    return;
+  }
+  MYCLASSES = data||[];
   el('m_class').innerHTML = MYCLASSES.length ? MYCLASSES.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('') : '';
   el('m_date').value = new Date().toISOString().slice(0,10);
   el('m_class').onchange = loadRoster;
@@ -170,6 +186,11 @@ async function loadClasses(){
 async function loadRoster(){
   const classId = el('m_class').value, date = el('m_date').value;
   if(!classId||!TERM){ el('roster').innerHTML='<div class="empty">No class.</div>'; return; }
+  if(!MYCLASSES.some(c=>c.id===classId)){
+    ROSTER=[];
+    el('roster').innerHTML='<div class="empty">You are not assigned to this class.</div>';
+    return;
+  }
   const { data:enr } = await sb.from('enrollments').select('student_id, students(name,grade_level)').eq('class_id',classId).eq('term_id',TERM.id).eq('status','enrolled');
   ROSTER = (enr||[]).map(e=>({ id:e.student_id, name:e.students?.name||'—', grade:e.students?.grade_level||'' }));
   if(MODE==='att'){
@@ -207,6 +228,7 @@ function allPresent(){ ROSTER.forEach(s=>STATUS[s.id]='present'); render(); }
 async function save(){
   const classId = el('m_class').value, date = el('m_date').value;
   if(!classId||!ROSTER.length){ alert('Nothing to save.'); return; }
+  if(!MYCLASSES.some(c=>c.id===classId)){ alert('You are not assigned to this class.'); return; }
   if(MODE==='att'){
     const rows = ROSTER.map(s=>({ class_id:classId, student_id:s.id, date, status:STATUS[s.id]||'present', marked_by:ME.id }));
     const { error } = await sb.from('attendance').upsert(rows, { onConflict:'class_id,student_id,date' });
@@ -234,3 +256,4 @@ boot();
 </script>
 </body>
 </html>
+
