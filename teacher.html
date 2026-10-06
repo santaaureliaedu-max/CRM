@@ -23,6 +23,12 @@
   .auth p{color:var(--slate);font-size:14px;margin-bottom:20px}
   label{display:block;font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--slate);margin:14px 0 5px}
   input,select{width:100%;padding:13px 12px;border:1px solid var(--hairline);border-radius:var(--radius);font-size:16px;font-family:var(--sans);background:#fff}
+  .password-wrap{position:relative}
+  .password-wrap input{padding-right:50px}
+  .password-toggle{position:absolute;right:4px;top:50%;transform:translateY(-50%);width:44px;height:44px;border:none;border-radius:6px;background:transparent;color:var(--slate);display:flex;align-items:center;justify-content:center;cursor:pointer}
+  .password-toggle:hover{color:var(--ink);background:var(--paper)}
+  .password-toggle:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
+  .password-toggle svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
   .btn{width:100%;padding:14px;border:none;border-radius:var(--radius);font-size:16px;font-weight:600;background:var(--ink);color:#fff;margin-top:18px}
   .btn:active{background:#2a3d63}
   .btn-sec{background:none;border:1px solid var(--hairline);color:var(--ink);margin-top:10px}
@@ -53,9 +59,13 @@
   <div id="auth" class="auth">
     <h1 id="authTitle">Teacher sign in</h1>
     <p id="authSub">Santa Aurelia attendance</p>
-    <div id="nameRow" style="display:none"><label>Your name</label><input id="t_name" placeholder="Full name"></div>
-    <label>Email</label><input id="t_email" type="email" autocomplete="username">
-    <label>Password</label><input id="t_pass" type="password" autocomplete="current-password">
+    <div id="nameRow" style="display:none"><label for="t_name">Your name</label><input id="t_name" placeholder="Full name"></div>
+    <label for="t_email">Email</label><input id="t_email" type="email" autocomplete="username">
+    <label for="t_pass">Password</label>
+    <div class="password-wrap">
+      <input id="t_pass" type="password" autocomplete="current-password">
+      <button class="password-toggle" id="passwordToggle" type="button" aria-label="Show password" aria-pressed="false" title="Show password"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"/><circle cx="12" cy="12" r="2.5"/></svg></button>
+    </div>
     <button class="btn" id="authBtn">Sign in</button>
     <button class="link" id="toggleMode" type="button">New here? Create an account</button>
     <button class="link" id="resendConfirm" type="button" style="display:none">Resend verification email</button>
@@ -95,6 +105,23 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const el = id => document.getElementById(id);
 const esc = s => (s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 let SIGNUP=false, ME=null, TERM=null, MYCLASSES=[], ROSTER=[], STATUS={}, MODE='att', GVAL={};
+
+function passwordIcon(showing){
+  return showing
+    ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 3 18 18"/><path d="M10.6 10.6a2 2 0 0 0 2.8 2.8"/><path d="M9.9 4.2A10.7 10.7 0 0 1 12 4c6 0 9.5 6 9.5 6a17 17 0 0 1-2.2 3.1M6.1 6.1C3.8 7.7 2.5 10 2.5 10s3.5 6 9.5 6a10.6 10.6 0 0 0 3.2-.5"/></svg>'
+    : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"/><circle cx="12" cy="12" r="2.5"/></svg>';
+}
+
+el('passwordToggle').addEventListener('click', ()=>{
+  const pass = el('t_pass');
+  const showing = pass.type === 'password';
+  pass.type = showing ? 'text' : 'password';
+  const toggle = el('passwordToggle');
+  toggle.setAttribute('aria-pressed', String(showing));
+  toggle.setAttribute('aria-label', showing ? 'Hide password' : 'Show password');
+  toggle.title = showing ? 'Hide password' : 'Show password';
+  toggle.innerHTML = passwordIcon(showing);
+});
 
 function setMode(m){
   MODE=m;
