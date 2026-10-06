@@ -178,6 +178,7 @@
       <button data-view="grades"><span class="num">05</span> Grades</button>
       <button data-view="incidents"><span class="num">06</span> Incidents</button>
       <button data-view="settings"><span class="num">07</span> Settings</button>
+      <button data-view="history"><span class="num">08</span> History</button>
     </nav>
     <div class="sidebar-foot">
       <strong id="userName">—</strong>
@@ -364,7 +365,27 @@
       <p style="color:var(--slate);font-size:13px;margin-bottom:16px">Recent changes made in the system, newest first.</p>
       <div id="auditTable"><div class="empty">Loading…</div></div>
     </div>
+
+    <div id="view-history" style="display:none">
+      <div class="section-head"><h2>Change history</h2><button class="btn btn-ghost" onclick="renderHistory()">Refresh</button></div>
+      <p style="color:var(--slate);font-size:13px;margin-bottom:16px">Shows the latest recorded creates, edits, and deletes. Open Details to see the saved before-and-after information.</p>
+      <div id="history_status" role="status" aria-live="polite" style="font-size:13px;margin-bottom:12px"></div>
+      <div style="overflow-x:auto"><div id="historyTable"><div class="empty">Open this tab to load history.</div></div></div>
+
+      <div class="section-head" style="margin-top:36px"><h2>Deleted data</h2></div>
+      <p style="color:var(--slate);font-size:13px;margin-bottom:16px">Deleted records are kept here with the record snapshot and deletion metadata. They are not restored automatically.</p>
+      <div style="overflow-x:auto"><div id="deletedDataTable"><div class="empty">Open this tab to load deleted records.</div></div></div>
+    </div>
   </main>
+</div>
+
+<!-- History detail modal -->
+<div class="modal-bg" id="historyDetailModal">
+  <div class="modal" style="max-width:760px">
+    <h3 id="historyDetailTitle">History details</h3>
+    <div id="historyDetailBody" style="max-height:65vh;overflow:auto"></div>
+    <div class="modal-actions"><button class="btn btn-primary" onclick="closeModal('historyDetailModal')">Close</button></div>
+  </div>
 </div>
 
 <!-- Add student modal -->
@@ -495,7 +516,7 @@ const SUPABASE_ANON_KEY = 'sb_publishable_IKmG6K1F7mKEDEb7jh3CtA_bwi86Tk3';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // ===== Globals =====
-let TERM=null, ALLTERMS=[], CFG={}, BANK={}, STUDENTS=[], PARENTS=[], INVOICES=[], CLASSES=[], TEACHERS=[], STAFF=[], ATTENDANCE=[], INCIDENTS=[], ENROLLMENTS=[];
+let TERM=null, ALLTERMS=[], CFG={}, BANK={}, STUDENTS=[], PARENTS=[], INVOICES=[], CLASSES=[], TEACHERS=[], STAFF=[], ATTENDANCE=[], INCIDENTS=[], ENROLLMENTS=[], HISTORY=[], DELETED_DATA=[];
 let ACTIVE='overview';
 
 // ===== Helpers =====
@@ -510,7 +531,8 @@ async function logAudit(action, detail){
   }catch(e){ /* never block a save on logging */ }
 }
 
-const BACKUP_TABLES = ['admin_users','attendance','audit_log','classes','enrollments','grades','incidents','invoices','parents','school_settings','students','terms'];
+const CORE_BACKUP_TABLES = ['admin_users','attendance','audit_log','classes','enrollments','grades','incidents','invoices','parents','school_settings','students','terms'];
+const ACCOUNTABILITY_BACKUP_TABLES = ['change_history','deleted_data'];
 function setBackupStatus(message, type='info'){
   const box = el('backup_status'); if(!box) return;
   box.textContent = message;
@@ -574,10 +596,20 @@ function csvCell(value){
   const text=value==null ? '' : typeof value==='object' ? JSON.stringify(value) : String(value);
   return '"'+text.replace(/"/g,'""')+'"';
 }
-function tableToCsv(rows){
-  const columns=[...new Set(rows.flatMap(row=>Object.keys(row)))];
-  if(!columns.length) return '';
+function allTablesToCsv(tables){
+  const rows=Object.entries(tables).flatMap(([source_table, records]) => records.map(record=>Object.assign({source_table},record)));
+  const extraColumns=new Set();
+  rows.forEach(row=>Object.keys(row).forEach(key=>{ if(key!=='source_table') extraColumns.add(key); }));
+  const columns=['source_table', ...extraColumns];
   return [columns.map(csvCell).join(','), ...rows.map(row=>columns.map(column=>csvCell(row[column])).join(','))].join('\r\n');
+}
+async function backupTablesForExport(){
+  const tables=[...CORE_BACKUP_TABLES], unavailable=[];
+  for(const table of ACCOUNTABILITY_BACKUP_TABLES){
+    const { error } = await sb.from(table).select('id').limit(1);
+    if(error) unavailable.push(table); else tables.push(table);
+  }
+  return { tables, unavailable };
 }
 async function downloadManualBackup(){
   const button = el('backup_download');
@@ -585,9 +617,10 @@ async function downloadManualBackup(){
   const originalLabel=button.textContent;
   try{
     const tables={};
-    for(let i=0;i<BACKUP_TABLES.length;i++){
-      const table=BACKUP_TABLES[i];
-      setBackupStatus(`Preparing ${i+1} of ${BACKUP_TABLES.length}: ${table}…`);
+    const { tables:tableList, unavailable } = await backupTablesForExport();
+    for(let i=0;i<tableList.length;i++){
+      const table=tableList[i];
+      setBackupStatus(`Preparing ${i+1} of ${tableList.length}: ${table}…`);
       tables[table]=await fetchBackupRows(table);
     }
     const exportedAt=new Date().toISOString();
@@ -595,15 +628,9 @@ async function downloadManualBackup(){
     let fileName, successMessage;
     if(format==='csv'){
       const prefix='santa-aurelia-data-export-'+exportedAt.slice(0,10);
-      for(let i=0;i<BACKUP_TABLES.length;i++){
-        const table=BACKUP_TABLES[i];
-        setBackupStatus(`Starting CSV download ${i+1} of ${BACKUP_TABLES.length}: ${table}…`);
-        downloadFile(tableToCsv(tables[table]),'text/csv;charset=utf-8',prefix+'-'+table+'.csv');
-      }
-      const manifest=[['table','row_count'],...BACKUP_TABLES.map(table=>[table,tables[table].length])];
-      downloadFile(manifest.map(row=>row.map(csvCell).join(',')).join('\r\n'),'text/csv;charset=utf-8',prefix+'-manifest.csv');
-      fileName=prefix+'-*.csv';
-      successMessage=`${BACKUP_TABLES.length} CSV downloads started. If asked, allow multiple downloads, then save every file together in private encrypted storage.`;
+      fileName=prefix+'.csv';
+      downloadFile(allTablesToCsv(tables),'text/csv;charset=utf-8',fileName);
+      successMessage='Download started. Save '+fileName+' in private encrypted storage.';
     } else {
       fileName='santa-aurelia-data-export-'+exportedAt.slice(0,10)+'.json';
       const payload={ format:'santa-aurelia-manual-data-export', exported_at:exportedAt, tables };
@@ -615,7 +642,8 @@ async function downloadManualBackup(){
     if(error){ setBackupStatus('Download started, but its date could not be recorded. Save the file and try the export again later.', 'error'); return; }
     CFG=record;
     renderBackupStatus();
-    setBackupStatus(successMessage, 'success');
+    const missingNote=unavailable.length ? ` History archive tables are not included until the database migration is run: ${unavailable.join(', ')}.` : '';
+    setBackupStatus(successMessage+missingNote, unavailable.length ? 'info' : 'success');
     logAudit('manual_export.downloaded', fileName);
   }catch(error){
     setBackupStatus('Could not create the data export. Check your connection and try again: '+error.message, 'error');
@@ -656,7 +684,7 @@ el('nav').addEventListener('click', e => {
   const btn = e.target.closest('button'); if(!btn) return;
   ACTIVE = btn.dataset.view;
   [...el('nav').children].forEach(b => b.classList.toggle('active', b===btn));
-  ['overview','enrollment','tuition','attendance','grades','incidents','settings'].forEach(v =>
+  ['overview','enrollment','tuition','attendance','grades','incidents','settings','history'].forEach(v =>
     el('view-'+v).style.display = (v===ACTIVE ? 'block' : 'none'));
   refreshActiveView();
 });
@@ -702,6 +730,7 @@ function refreshActiveView(){
   if(ACTIVE==='grades'){ renderGrades(); }
   if(ACTIVE==='incidents'){ renderIncidentsTab(); }
   if(ACTIVE==='settings'){ renderSettings(); }
+  if(ACTIVE==='history'){ renderHistory(); }
 }
 
 function renderMasthead(){
@@ -1196,6 +1225,58 @@ async function renderAudit(){
     data.map(a=>`<tr><td class="sub" style="white-space:nowrap">${new Date(a.created_at).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</td><td class="sub">${esc(a.actor_email||'')}</td><td>${esc(a.action)}</td><td class="sub">${esc(a.detail||'')}</td></tr>`).join('')
   }</tbody></table>`;
 }
+function setHistoryStatus(message, isError=false){
+  const box=el('history_status'); if(!box) return;
+  box.textContent=message;
+  box.style.color=isError ? 'var(--rust)' : 'var(--slate)';
+  box.setAttribute('role',isError ? 'alert' : 'status');
+}
+function historyTime(value){ return value ? new Date(value).toLocaleString('en-GB',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '—'; }
+function historySummary(item){
+  if(item.action==='UPDATE'){
+    const fields=Object.keys(item.changed_fields||{});
+    return fields.length ? 'Changed: '+fields.join(', ') : 'Record updated.';
+  }
+  return item.action==='INSERT' ? 'Record created.' : item.action==='DELETE' ? 'Record deleted and archived.' : 'Record changed.';
+}
+function jsonDetail(title, value){
+  return `<h4 style="margin:18px 0 8px">${esc(title)}</h4><pre style="margin:0;padding:12px;background:var(--paper);border:1px solid var(--hairline);border-radius:var(--radius);white-space:pre-wrap;word-break:break-word;font-size:12px">${esc(JSON.stringify(value||{},null,2))}</pre>`;
+}
+function openHistoryDetail(kind, id){
+  const item = kind==='deleted' ? DELETED_DATA.find(row=>row.id===id) : HISTORY.find(row=>row.id===id);
+  if(!item) return;
+  const body=el('historyDetailBody');
+  if(kind==='deleted'){
+    el('historyDetailTitle').textContent='Deleted data details';
+    body.innerHTML=`<p class="sub">${esc(item.source_table||'record')} · ${esc(item.source_record_id||'—')} · deleted ${esc(historyTime(item.deleted_at))} by ${esc(item.deleted_by_email||'Unknown')}</p>${jsonDetail('Deletion metadata',item.metadata)}${jsonDetail('Saved record snapshot',item.deleted_data)}`;
+  } else {
+    el('historyDetailTitle').textContent='Change history details';
+    body.innerHTML=`<p class="sub">${esc(item.action||'CHANGE')} · ${esc(item.table_name||'record')} · ${esc(item.record_id||'—')} · ${esc(historyTime(item.created_at))} by ${esc(item.actor_email||'Unknown')}</p>${jsonDetail('Changed fields',item.changed_fields)}${item.before_data?jsonDetail('Before',item.before_data):''}${item.after_data?jsonDetail('After',item.after_data):''}`;
+  }
+  el('historyDetailModal').classList.add('open');
+}
+async function renderHistory(){
+  const historyBox=el('historyTable'), deletedBox=el('deletedDataTable');
+  historyBox.innerHTML='<div class="empty">Loading history…</div>';
+  deletedBox.innerHTML='<div class="empty">Loading deleted data…</div>';
+  setHistoryStatus('Loading the latest accountability records…');
+  const [historyResult, deletedResult] = await Promise.all([
+    sb.from('change_history').select('*').order('created_at',{ascending:false}).limit(200),
+    sb.from('deleted_data').select('*').order('deleted_at',{ascending:false}).limit(200)
+  ]);
+  if(historyResult.error || deletedResult.error){
+    const message=(historyResult.error||deletedResult.error).message||'Unknown error';
+    historyBox.innerHTML='<div class="empty">History is not ready yet.</div>';
+    deletedBox.innerHTML='<div class="empty">Deleted data is not ready yet.</div>';
+    setHistoryStatus('Run the change-history database migration, then press Refresh. '+message,true);
+    return;
+  }
+  HISTORY=historyResult.data||[];
+  DELETED_DATA=deletedResult.data||[];
+  setHistoryStatus(`Showing the latest ${HISTORY.length} changes and ${DELETED_DATA.length} deleted records.`);
+  historyBox.innerHTML=HISTORY.length ? `<table><thead><tr><th>When</th><th>Who</th><th>What</th><th>Record</th><th>Summary</th><th></th></tr></thead><tbody>${HISTORY.map(item=>`<tr><td class="sub" style="white-space:nowrap">${esc(historyTime(item.created_at))}</td><td class="sub">${esc(item.actor_email||'Unknown')}</td><td>${esc(item.action||'CHANGE')} ${esc(item.table_name||'')}</td><td class="sub">${esc(item.record_id||'—')}</td><td class="sub">${esc(historySummary(item))}</td><td><button class="btn btn-ghost" onclick="openHistoryDetail('change','${item.id}')">Details</button></td></tr>`).join('')}</tbody></table>` : '<div class="empty">No changes have been recorded since the history migration was installed.</div>';
+  deletedBox.innerHTML=DELETED_DATA.length ? `<table><thead><tr><th>When</th><th>Who</th><th>Source</th><th>Record</th><th></th></tr></thead><tbody>${DELETED_DATA.map(item=>`<tr><td class="sub" style="white-space:nowrap">${esc(historyTime(item.deleted_at))}</td><td class="sub">${esc(item.deleted_by_email||'Unknown')}</td><td>${esc(item.source_table||'')}</td><td class="sub">${esc(item.source_record_id||'—')}</td><td><button class="btn btn-ghost" onclick="openHistoryDetail('deleted','${item.id}')">Details</button></td></tr>`).join('')}</tbody></table>` : '<div class="empty">No deleted records have been archived since the history migration was installed.</div>';
+}
 function renderSettings(){
   fillConfig();
   renderTerms();
@@ -1673,4 +1754,3 @@ setTimeout(()=>{ if(el('login').style.display!=='none') pingConnection(); }, 300
 </script>
 </body>
 </html>
-
