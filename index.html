@@ -340,6 +340,26 @@
         <div style="margin-top:20px"><button class="btn btn-primary" onclick="saveMessages()">Save messages &amp; payment</button> <span id="msg_msg" style="font-size:13px;margin-left:10px"></span></div>
       </div>
 
+      <div class="section-head" style="margin-top:36px"><h2>Manual data export</h2></div>
+      <p style="color:var(--slate);font-size:13px;margin-bottom:16px">Download all current app data as one JSON file or as spreadsheet-friendly CSV files. It includes student, family, staff, and financial information, so save it only in private, encrypted storage.</p>
+      <div style="background:var(--paper-raised);border:1px solid var(--hairline);padding:22px;max-width:560px">
+        <div style="max-width:300px;margin-bottom:20px"><label for="backup_format" style="display:block;font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--slate);margin-bottom:5px">Download format</label><select id="backup_format" onchange="updateExportFormatHint()" style="width:100%;padding:9px 11px;border:1px solid var(--hairline);border-radius:var(--radius)"><option value="json">JSON — one complete file</option><option value="csv">CSV — separate spreadsheet files</option></select><div id="backup_format_hint" style="font-size:11px;color:var(--slate);margin-top:5px"></div></div>
+        <div style="display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap">
+          <div>
+            <div style="font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--slate);margin-bottom:5px">Last recorded export</div>
+            <strong id="backup_last">No export recorded yet.</strong>
+            <div id="backup_due" style="font-size:12px;color:var(--slate);margin-top:4px"></div>
+          </div>
+          <button id="backup_download" class="btn btn-primary" onclick="downloadManualBackup()">Download data export</button>
+        </div>
+        <div style="display:flex;align-items:flex-end;gap:10px;margin-top:20px;flex-wrap:wrap">
+          <div style="max-width:180px"><label for="backup_interval" style="display:block;font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--slate);margin-bottom:5px">Remind me every (days)</label><input id="backup_interval" type="number" min="1" max="90" inputmode="numeric" style="width:100%;padding:9px 11px;border:1px solid var(--hairline);border-radius:var(--radius)"></div>
+          <button class="btn btn-ghost" onclick="saveBackupReminder()">Save reminder</button>
+        </div>
+        <div style="font-size:11px;color:var(--slate);margin-top:12px">The reminder appears when this Headmaster app is opened. This export does not include Supabase passwords, database rules, or uploaded files.</div>
+        <div id="backup_status" role="status" aria-live="polite" style="font-size:13px;margin-top:12px"></div>
+      </div>
+
       <div class="section-head" style="margin-top:36px"><h2>Activity log</h2></div>
       <p style="color:var(--slate);font-size:13px;margin-bottom:16px">Recent changes made in the system, newest first.</p>
       <div id="auditTable"><div class="empty">Loading…</div></div>
@@ -488,6 +508,121 @@ async function logAudit(action, detail){
     const { data:{ session } } = await sb.auth.getSession();
     await sb.from('audit_log').insert({ actor_id:session?.user?.id||null, actor_email:session?.user?.email||null, action, detail:detail||null });
   }catch(e){ /* never block a save on logging */ }
+}
+
+const BACKUP_TABLES = ['admin_users','attendance','audit_log','classes','enrollments','grades','incidents','invoices','parents','school_settings','students','terms'];
+function setBackupStatus(message, type='info'){
+  const box = el('backup_status'); if(!box) return;
+  box.textContent = message;
+  box.style.color = type==='error' ? 'var(--rust)' : type==='success' ? 'var(--green)' : 'var(--slate)';
+}
+function exportFormat(){ return el('backup_format').value==='csv' ? 'csv' : 'json'; }
+function updateExportFormatHint(){
+  const hint=el('backup_format_hint'); if(!hint) return;
+  hint.textContent = exportFormat()==='csv'
+    ? 'Creates one CSV file per table plus a manifest. Your browser may ask to allow multiple downloads.'
+    : 'Creates one complete JSON file. This is the best format for keeping all table relationships together.';
+}
+function renderBackupStatus(){
+  const last = CFG.lastManualExportAt ? new Date(CFG.lastManualExportAt) : null;
+  const days = Math.min(90, Math.max(1, Number(CFG.manualExportReminderDays)||7));
+  el('backup_interval').value = days;
+  el('backup_format').value = CFG.lastManualExportFormat==='csv' ? 'csv' : 'json';
+  updateExportFormatHint();
+  if(!last || Number.isNaN(last.getTime())){
+    el('backup_last').textContent='No export recorded yet.';
+    el('backup_due').textContent='Download one now, then keep the file in private encrypted storage.';
+    return;
+  }
+  const due = new Date(last.getTime() + days*86400000);
+  el('backup_last').textContent=last.toLocaleString('en-GB',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  if(due <= new Date()){
+    el('backup_due').textContent='A new data export is due now.';
+    el('backup_due').style.color='var(--rust)';
+  } else {
+    el('backup_due').textContent='Next reminder: '+due.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})+'.';
+    el('backup_due').style.color='var(--slate)';
+  }
+}
+async function saveBackupReminder(){
+  const days = Number(el('backup_interval').value);
+  if(!Number.isInteger(days) || days<1 || days>90){ setBackupStatus('Choose a whole number from 1 to 90 days.', 'error'); return; }
+  setBackupStatus('Saving reminder…');
+  const newCfg = Object.assign({}, CFG, { manualExportReminderDays:days });
+  const { error } = await sb.from('school_settings').update({ config:newCfg, updated_at:new Date().toISOString() }).eq('id',1);
+  if(error){ setBackupStatus('Could not save the reminder. Please try again: '+error.message, 'error'); return; }
+  CFG = newCfg;
+  renderBackupStatus();
+  setBackupStatus('Reminder saved.', 'success');
+}
+async function fetchBackupRows(table){
+  const pageSize=1000, rows=[];
+  for(let from=0;;from+=pageSize){
+    const { data, error } = await sb.from(table).select('*').range(from,from+pageSize-1);
+    if(error) throw new Error(table+': '+error.message);
+    rows.push(...(data||[]));
+    if(!data || data.length<pageSize) return rows;
+  }
+}
+function downloadFile(content, type, fileName){
+  const blob=new Blob([content],{type});
+  const url=URL.createObjectURL(blob), link=document.createElement('a');
+  link.href=url; link.download=fileName; document.body.appendChild(link); link.click(); link.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),0);
+}
+function csvCell(value){
+  const text=value==null ? '' : typeof value==='object' ? JSON.stringify(value) : String(value);
+  return '"'+text.replace(/"/g,'""')+'"';
+}
+function tableToCsv(rows){
+  const columns=[...new Set(rows.flatMap(row=>Object.keys(row)))];
+  if(!columns.length) return '';
+  return [columns.map(csvCell).join(','), ...rows.map(row=>columns.map(column=>csvCell(row[column])).join(','))].join('\r\n');
+}
+async function downloadManualBackup(){
+  const button = el('backup_download');
+  button.disabled=true;
+  const originalLabel=button.textContent;
+  try{
+    const tables={};
+    for(let i=0;i<BACKUP_TABLES.length;i++){
+      const table=BACKUP_TABLES[i];
+      setBackupStatus(`Preparing ${i+1} of ${BACKUP_TABLES.length}: ${table}…`);
+      tables[table]=await fetchBackupRows(table);
+    }
+    const exportedAt=new Date().toISOString();
+    const format=exportFormat();
+    let fileName, successMessage;
+    if(format==='csv'){
+      const prefix='santa-aurelia-data-export-'+exportedAt.slice(0,10);
+      for(let i=0;i<BACKUP_TABLES.length;i++){
+        const table=BACKUP_TABLES[i];
+        setBackupStatus(`Starting CSV download ${i+1} of ${BACKUP_TABLES.length}: ${table}…`);
+        downloadFile(tableToCsv(tables[table]),'text/csv;charset=utf-8',prefix+'-'+table+'.csv');
+      }
+      const manifest=[['table','row_count'],...BACKUP_TABLES.map(table=>[table,tables[table].length])];
+      downloadFile(manifest.map(row=>row.map(csvCell).join(',')).join('\r\n'),'text/csv;charset=utf-8',prefix+'-manifest.csv');
+      fileName=prefix+'-*.csv';
+      successMessage=`${BACKUP_TABLES.length} CSV downloads started. If asked, allow multiple downloads, then save every file together in private encrypted storage.`;
+    } else {
+      fileName='santa-aurelia-data-export-'+exportedAt.slice(0,10)+'.json';
+      const payload={ format:'santa-aurelia-manual-data-export', exported_at:exportedAt, tables };
+      downloadFile(JSON.stringify(payload,null,2),'application/json',fileName);
+      successMessage='Download started. Save '+fileName+' in private encrypted storage.';
+    }
+    const record=Object.assign({}, CFG, { lastManualExportAt:exportedAt, lastManualExportFile:fileName, lastManualExportFormat:format });
+    const { error } = await sb.from('school_settings').update({ config:record, updated_at:exportedAt }).eq('id',1);
+    if(error){ setBackupStatus('Download started, but its date could not be recorded. Save the file and try the export again later.', 'error'); return; }
+    CFG=record;
+    renderBackupStatus();
+    setBackupStatus(successMessage, 'success');
+    logAudit('manual_export.downloaded', fileName);
+  }catch(error){
+    setBackupStatus('Could not create the data export. Check your connection and try again: '+error.message, 'error');
+  }finally{
+    button.disabled=false;
+    button.textContent=originalLabel;
+  }
 }
 
 // ===== Auth =====
@@ -1105,6 +1240,7 @@ function fillConfig(){
   el('cfg_remtpl').value = CFG.waReminderTpl || DEFAULT_REM_TPL;
   el('cfg_reptpl').value = CFG.waReportTpl || DEFAULT_REP_TPL;
   el('msg_msg').textContent='';
+  renderBackupStatus();
 }
 async function saveMessages(){
   const msg = el('msg_msg'); msg.textContent=''; msg.style.color='var(--slate)';
@@ -1537,3 +1673,4 @@ setTimeout(()=>{ if(el('login').style.display!=='none') pingConnection(); }, 300
 </script>
 </body>
 </html>
+
