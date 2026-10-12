@@ -51,6 +51,10 @@
   .bar{position:sticky;bottom:0;padding:14px 0;background:linear-gradient(transparent,var(--paper) 30%)}
   .empty{text-align:center;color:var(--slate);padding:30px 10px;font-size:14px}
   .pending-note{background:var(--brass-soft);border:1px solid var(--brass);border-radius:var(--radius);padding:16px;font-size:14px;text-align:center;margin-top:20px}
+  .lang-switch{display:inline-flex;gap:3px;padding:3px;border:1px solid var(--hairline);border-radius:999px;background:var(--raised)}
+  .lang-switch button{min-width:44px;min-height:36px;padding:6px 10px;border:0;border-radius:999px;background:transparent;color:var(--slate);font-size:12px;font-weight:700;cursor:pointer}
+  .lang-switch button.active{background:var(--ink);color:#fff}
+  .auth .lang-switch{margin-bottom:8px}
 </style>
 </head>
 <body>
@@ -59,6 +63,7 @@
   <div id="auth" class="auth">
     <h1 id="authTitle">Teacher sign in</h1>
     <p id="authSub">Santa Aurelia attendance</p>
+    <div class="lang-switch" aria-label="Language"><button type="button" data-language="en" onclick="SantaI18n.setLanguage('en')">EN</button><button type="button" data-language="id" onclick="SantaI18n.setLanguage('id')">ID</button></div>
     <div id="nameRow" style="display:none"><label for="t_name">Your name</label><input id="t_name" placeholder="Full name"></div>
     <label for="t_email">Email</label><input id="t_email" type="email" autocomplete="username">
     <label for="t_pass">Password</label>
@@ -77,6 +82,7 @@
     <div class="topbar">
       <div class="crest">SA</div>
       <div class="name">Santa Aurelia<span id="t_who"></span></div>
+      <div class="lang-switch" aria-label="Language"><button type="button" data-language="en" onclick="SantaI18n.setLanguage('en')">EN</button><button type="button" data-language="id" onclick="SantaI18n.setLanguage('id')">ID</button></div>
       <button class="out" id="t_out">Sign out</button>
     </div>
     <div id="pendingBox" style="display:none" class="pending-note">Your account is waiting for the headmaster to approve it. Check back once approved.</div>
@@ -97,6 +103,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/i18n.js"></script>
 <script>
 const SUPABASE_URL = 'https://gthlpszvpvtoqkodbeaa.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_IKmG6K1F7mKEDEb7jh3CtA_bwi86Tk3';
