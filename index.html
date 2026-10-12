@@ -114,6 +114,36 @@
   .modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:24px}
   .modal .err{color:var(--rust);font-size:12px;margin-top:10px;min-height:14px}
   .field-note{font-size:11px;color:var(--slate);margin-top:3px}
+  .lang-switch{display:inline-flex;gap:3px;padding:3px;border:1px solid var(--hairline);border-radius:999px;background:var(--paper-raised)}
+  .lang-switch button{min-width:44px;min-height:36px;padding:6px 10px;border:0;border-radius:999px;background:transparent;color:var(--slate);font-size:12px;font-weight:700}
+  .lang-switch button.active{background:var(--ink);color:#fff}
+  #login .lang-switch button{width:auto;margin:0;padding:6px 12px;background:transparent;color:var(--slate)}
+  #login .lang-switch button.active{background:var(--ink);color:#fff}
+  .sidebar .lang-switch{margin-top:12px;border-color:rgba(233,228,216,.24);background:rgba(255,255,255,.04)}
+  .sidebar .lang-switch button{color:rgba(233,228,216,.7)}
+  .sidebar .lang-switch button.active{background:var(--brass);color:var(--ink)}
+  .finance-actions{display:flex;gap:8px;flex-wrap:wrap}
+  .finance-note{color:var(--slate);font-size:13px;margin-bottom:16px;max-width:880px}
+  .finance-positive{color:var(--green)} .finance-negative{color:var(--rust)}
+  .finance-table-wrap{overflow-x:auto;margin-bottom:28px}
+  .finance-table-wrap table{min-width:720px}
+  .finance-table-wrap td:not(:first-child),.finance-table-wrap th:not(:first-child){text-align:right}
+  .finance-kpis .kpi-value{font-size:clamp(20px,2.5vw,30px)}
+  .finance-filters{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-bottom:18px}
+  .finance-filter{min-width:220px}
+  .finance-filter>label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--slate);margin-bottom:5px}
+  .month-picker{display:flex;align-items:stretch;gap:6px}
+  .month-picker input{min-width:170px;padding:8px 10px;border:1px solid var(--hairline);border-radius:var(--radius);background:#fff;color:var(--ink);font:inherit}
+  .month-picker button{width:40px;min-height:40px;padding:0;border:1px solid var(--hairline);border-radius:var(--radius);background:#fff;color:var(--ink);font-size:18px;line-height:1}
+  .month-picker button:hover{background:var(--brass-soft)}
+  .money-input{display:flex;align-items:stretch;border:1px solid var(--hairline);border-radius:var(--radius);overflow:hidden;background:#fff}
+  .money-input:focus-within{outline:2px solid var(--brass);outline-offset:2px}
+  .money-input span{display:flex;align-items:center;padding:0 12px;background:var(--paper);border-right:1px solid var(--hairline);font-weight:700;color:var(--ink-soft)}
+  .modal .money-input input{border:0;border-radius:0;outline:0;font-family:var(--mono);font-size:17px;font-weight:600}
+  .quick-date-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}
+  .quick-date-row button{padding:6px 10px;border:1px solid var(--hairline);border-radius:999px;background:#fff;color:var(--ink);font:600 11px var(--sans)}
+  .quick-date-row button:hover{background:var(--brass-soft)}
+  .expense-post-note{margin-top:14px;padding:10px 12px;background:var(--green-bg);border-left:3px solid var(--green);color:var(--green);font-size:12px}
 
   .placeholder{padding:60px 20px;text-align:center;color:var(--slate)}
   .placeholder h2{font-family:var(--serif);font-size:20px;color:var(--ink);margin-bottom:8px}
@@ -145,6 +175,11 @@
     .kpi-row{grid-template-columns:repeat(2,1fr)}
     .grid-2{grid-template-columns:1fr}
     .masthead{flex-direction:column;align-items:flex-start;gap:10px}
+    .btn,nav.tabs button{min-height:44px}
+    input,select,textarea{min-height:44px}
+    .finance-filter{min-width:100%;width:100%}
+    .finance-filter select{width:100%;max-width:none!important}
+    .month-picker input{min-width:0;flex:1}
   }
 </style>
 </head>
@@ -154,7 +189,11 @@
   <div class="card">
     <div class="crest-mark">SA</div>
     <h1>Santa Aurelia</h1>
-    <p>Headmaster console. Owner access only.</p>
+    <p>Headmaster &amp; administration console.</p>
+    <div class="lang-switch" aria-label="Language">
+      <button type="button" data-language="en" onclick="SantaI18n.setLanguage('en')">EN</button>
+      <button type="button" data-language="id" onclick="SantaI18n.setLanguage('id')">ID</button>
+    </div>
     <label for="email">Email</label>
     <input id="email" type="email" autocomplete="username" placeholder="you@school.sch.id">
     <label for="password">Password</label>
@@ -179,15 +218,23 @@
       <button data-view="incidents"><span class="num">06</span> Incidents</button>
       <button data-view="settings"><span class="num">07</span> Settings</button>
       <button data-view="history"><span class="num">08</span> History</button>
+      <button data-view="units"><span class="num">09</span> Units</button>
+      <button data-view="expenses" data-finance-nav><span class="num">10</span> Expenses</button>
+      <button data-view="finance" data-finance-nav><span class="num">11</span> Financials</button>
     </nav>
     <div class="sidebar-foot">
       <strong id="userName">—</strong>
-      Headmaster
+      <span id="userRoleLabel">Headmaster</span>
       <a id="logoutBtn">Sign out</a>
+      <div class="lang-switch" aria-label="Language">
+        <button type="button" data-language="en" onclick="SantaI18n.setLanguage('en')">EN</button>
+        <button type="button" data-language="id" onclick="SantaI18n.setLanguage('id')">ID</button>
+      </div>
     </div>
   </aside>
 
   <main>
+    <div id="setupBanner" role="alert" style="display:none;background:var(--rust-bg);border:1px solid var(--rust);color:var(--rust);padding:12px 16px;border-radius:var(--radius);margin-bottom:18px;font-size:13px"></div>
     <div class="masthead">
       <div>
         <h1 id="greeting">Loading…</h1>
@@ -233,7 +280,7 @@
     <div id="view-enrollment" style="display:none">
       <div class="section-head">
         <h2>Students</h2>
-        <div><button class="btn btn-ghost" onclick="openImport()">Import CSV</button> <button class="btn btn-primary" onclick="openAddStudent()">+ Add student</button></div>
+        <div><label style="font-size:12px;margin-right:10px"><input type="checkbox" id="includeArchived" onchange="INCLUDE_ARCHIVED=this.checked;renderStudents()"> Include archived</label> <button class="btn btn-ghost" onclick="openImport()">Import CSV</button> <button class="btn btn-primary" onclick="openAddStudent()">+ Add student</button></div>
       </div>
       <div id="studentsTable"><div class="empty">Loading…</div></div>
 
@@ -248,10 +295,18 @@
     <div id="view-tuition" style="display:none">
       <div class="section-head">
         <h2>Tuition</h2>
-        <div><button class="btn btn-ghost" onclick="generateInvoices()">Generate Uang Sekolah (semua keluarga)</button> <button class="btn btn-primary" onclick="openBuildInvoice()">+ Buat Invoice</button></div>
+        <div><button class="btn btn-ghost" data-owner-only onclick="openGeneratePreview()">Generate Uang Sekolah (preview)</button> <button class="btn btn-primary" onclick="openBuildInvoice()">+ Buat Invoice</button></div>
       </div>
       <p style="color:var(--slate);font-size:13px;margin-bottom:16px">Satu invoice per keluarga, dengan rincian komponen biaya. Pembayaran bisa dicicil — klik “Kelola” untuk mencatat cicilan.</p>
       <div id="tuitionTable"><div class="empty">Loading…</div></div>
+
+      <div class="section-head" style="margin-top:36px"><h2>Tuition schedules</h2><button class="btn btn-primary" onclick="openAddSchedule()">+ Add schedule</button></div>
+      <p style="color:var(--slate);font-size:13px;margin-bottom:16px">Per-unit, per-term prices. One active schedule per unit + component + term.</p>
+      <div id="schedulesTable"><div class="empty">Loading…</div></div>
+
+      <div class="section-head" style="margin-top:36px"><h2>Student tuition overrides</h2><button class="btn btn-primary" onclick="openAddOverride()">+ Add override</button></div>
+      <p style="color:var(--slate);font-size:13px;margin-bottom:16px">Per-student agreements (scholarship, sibling discount, negotiated fee). Every override needs a reason.</p>
+      <div id="overridesTable"><div class="empty">Loading…</div></div>
     </div>
     <div id="view-attendance" style="display:none">
       <div class="section-head"><h2>Mark attendance</h2></div>
@@ -289,7 +344,7 @@
           <div><label style="display:block;font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--slate);margin-bottom:5px">End</label><input id="tm_end" type="date" style="width:100%;padding:9px 11px;border:1px solid var(--hairline);border-radius:var(--radius)"></div>
         </div>
         <div style="display:flex;align-items:flex-end;gap:10px;margin-top:12px">
-          <div style="flex:1"><label style="display:block;font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--slate);margin-bottom:5px">Tuition per student (Rp)</label><input id="tm_fee" type="number" style="width:100%;padding:9px 11px;border:1px solid var(--hairline);border-radius:var(--radius)"></div>
+          <div style="flex:1"><label style="display:block;font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--slate);margin-bottom:5px">Tuition per student (Rp)</label><input id="tm_fee" type="text" inputmode="numeric" autocomplete="off" style="width:100%;padding:9px 11px;border:1px solid var(--hairline);border-radius:var(--radius)"></div>
           <button class="btn btn-primary" onclick="addTerm()">Add term</button>
         </div>
         <span id="term_msg" style="font-size:13px"></span>
@@ -306,7 +361,7 @@
         <label style="display:block;font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--slate);margin:0 0 5px">School name</label>
         <input id="cfg_name" style="width:100%;padding:9px 11px;border:1px solid var(--hairline);border-radius:var(--radius)">
         <label style="display:block;font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--slate);margin:14px 0 5px">Term tuition, per student (Rp)</label>
-        <input id="cfg_tuition" type="number" style="width:100%;padding:9px 11px;border:1px solid var(--hairline);border-radius:var(--radius)">
+        <input id="cfg_tuition" type="text" inputmode="numeric" autocomplete="off" style="width:100%;padding:9px 11px;border:1px solid var(--hairline);border-radius:var(--radius)">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px">
           <div><label style="display:block;font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--slate);margin-bottom:5px">Invoice due day</label><input id="cfg_dueday" type="number" style="width:100%;padding:9px 11px;border:1px solid var(--hairline);border-radius:var(--radius)"></div>
           <div><label style="display:block;font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--slate);margin-bottom:5px">Overdue after (days)</label><input id="cfg_followup" type="number" style="width:100%;padding:9px 11px;border:1px solid var(--hairline);border-radius:var(--radius)"></div>
@@ -368,13 +423,58 @@
 
     <div id="view-history" style="display:none">
       <div class="section-head"><h2>Change history</h2><button class="btn btn-ghost" onclick="renderHistory()">Refresh</button></div>
-      <p style="color:var(--slate);font-size:13px;margin-bottom:16px">Shows the latest recorded creates, edits, and deletes. Open Details to see the saved before-and-after information.</p>
+      <p style="color:var(--slate);font-size:13px;margin-bottom:12px">Shows the latest recorded creates, edits, deletes, archives, and voids. Open Details to see the saved before-and-after information. Times are shown in Jakarta local time.</p>
+      <div id="history_filters" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;background:var(--paper-raised);border:1px solid var(--hairline);padding:14px 16px;margin-bottom:14px">
+        <div><label style="display:block;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--slate);margin-bottom:4px">Actor / user</label><input id="hf_actor" placeholder="name or email" style="width:100%;padding:8px 10px;border:1px solid var(--hairline);border-radius:var(--radius)"></div>
+        <div><label style="display:block;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--slate);margin-bottom:4px">Action</label><select id="hf_action" style="width:100%;padding:8px 10px;border:1px solid var(--hairline);border-radius:var(--radius)"><option value="">All</option><option>INSERT</option><option>UPDATE</option><option>DELETE</option></select></div>
+        <div><label style="display:block;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--slate);margin-bottom:4px">Record type</label><select id="hf_table" style="width:100%;padding:8px 10px;border:1px solid var(--hairline);border-radius:var(--radius)"><option value="">All</option></select></div>
+        <div><label style="display:block;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--slate);margin-bottom:4px">Record ID / name</label><input id="hf_record" placeholder="search" style="width:100%;padding:8px 10px;border:1px solid var(--hairline);border-radius:var(--radius)"></div>
+        <div><label style="display:block;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--slate);margin-bottom:4px">From</label><input id="hf_from" type="date" style="width:100%;padding:8px 10px;border:1px solid var(--hairline);border-radius:var(--radius)"></div>
+        <div><label style="display:block;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--slate);margin-bottom:4px">To</label><input id="hf_to" type="date" style="width:100%;padding:8px 10px;border:1px solid var(--hairline);border-radius:var(--radius)"></div>
+        <div style="display:flex;align-items:flex-end"><button class="btn btn-ghost" onclick="applyHistoryFilters()" style="width:100%">Apply filters</button></div>
+      </div>
       <div id="history_status" role="status" aria-live="polite" style="font-size:13px;margin-bottom:12px"></div>
       <div style="overflow-x:auto"><div id="historyTable"><div class="empty">Open this tab to load history.</div></div></div>
 
       <div class="section-head" style="margin-top:36px"><h2>Deleted data</h2></div>
-      <p style="color:var(--slate);font-size:13px;margin-bottom:16px">Deleted records are kept here with the record snapshot and deletion metadata. They are not restored automatically.</p>
+      <p style="color:var(--slate);font-size:13px;margin-bottom:16px">Deleted records are kept here with the record snapshot, who deleted them, the reason, and the transaction/correlation ID. They are not restored automatically (restoration is not yet available).</p>
       <div style="overflow-x:auto"><div id="deletedDataTable"><div class="empty">Open this tab to load deleted records.</div></div></div>
+    </div>
+
+    <!-- UNITS -->
+    <div id="view-units" style="display:none">
+      <div class="section-head"><h2>School units</h2><div><button class="btn btn-ghost" onclick="addRecommendedUnits()">Add recommended units</button> <button class="btn btn-primary" onclick="openAddUnit()">+ Add unit</button></div></div>
+      <p style="color:var(--slate);font-size:13px;margin-bottom:16px">Recommended units follow santaaurelia.com: Daycare, Playgroup/Nursery, Kindergarten K1–K2, Elementary/PKBM Grade 1–6, and Amazing Kids Therapy Centre. You can add or rename units; codes are permanent and never reused.</p>
+      <div id="units_status" role="status" aria-live="polite" style="font-size:13px;margin-bottom:12px"></div>
+      <div id="unitsTable"><div class="empty">Loading…</div></div>
+
+      <div class="section-head" style="margin-top:36px"><h2>Unassigned records</h2></div>
+      <p style="color:var(--slate);font-size:13px;margin-bottom:16px">Records without a school unit are listed here so nothing is silently excluded from unit reports. Assign each record a unit; until every record is assigned, unit financial reports are incomplete.</p>
+      <div id="unassignedBox"><div class="empty">Loading…</div></div>
+    </div>
+
+    <!-- EXPENSES -->
+    <div id="view-expenses" style="display:none">
+      <div class="section-head"><h2>Expenses</h2><button class="btn btn-primary" onclick="openAddExpense()">+ Add expense</button></div>
+      <p style="color:var(--slate);font-size:13px;margin-bottom:16px">Record spending by date and school level. New entries are posted as paid expenses and included in the monthly report immediately.</p>
+      <div id="expenses_status" role="status" aria-live="polite" style="font-size:13px;margin-bottom:12px"></div>
+      <div id="expensesTable"><div class="empty">Loading…</div></div>
+    </div>
+
+    <!-- FINANCE -->
+    <div id="view-finance" style="display:none">
+      <div class="section-head"><h2>Financial overview</h2><div class="finance-actions"><button class="btn btn-ghost" onclick="openBuildInvoice()">+ Create student invoice</button><button class="btn btn-primary" onclick="openAddExpense()">+ Record expense</button></div></div>
+      <p class="finance-note">Revenue comes only from student invoice payments. Estimated profit is a management cash-basis result (student revenue minus paid expenses), not audited accounting profit. Record payroll and every other cost as an expense for a useful result.</p>
+      <div class="finance-filters">
+        <div class="finance-filter"><label for="fin_unit">Level / unit</label><select id="fin_unit" class="inline" style="max-width:260px" onchange="renderFinance()"></select></div>
+        <div class="finance-filter"><label for="fin_month">Report month</label><div class="month-picker"><button type="button" aria-label="Previous month" title="Previous month" onclick="shiftFinanceMonth(-1)">‹</button><input id="fin_month" type="month" onchange="applyFinanceMonth()"><button type="button" aria-label="Next month" title="Next month" onclick="shiftFinanceMonth(1)">›</button></div></div>
+        <button type="button" class="btn btn-ghost" onclick="showAllFinanceMonths()">All time</button>
+        <input id="fin_from" type="hidden"><input id="fin_to" type="hidden">
+      </div>
+      <div id="finance_status" role="status" aria-live="polite" style="font-size:13px;margin-bottom:12px"></div>
+      <div id="financeBox"><div class="empty">Loading…</div></div>
+      <div class="section-head" style="margin-top:28px"><h2>Recent expenses</h2><button class="btn btn-primary" onclick="openAddExpense()">+ Record expense</button></div>
+      <div id="financeExpensesTable"><div class="empty">Loading…</div></div>
     </div>
   </main>
 </div>
@@ -457,7 +557,9 @@
 <div class="modal-bg" id="buildModal">
   <div class="modal">
     <h3>Buat Invoice</h3>
-    <div class="modal-sub">Pilih keluarga, isi jumlah untuk komponen yang berlaku (kosongkan yang tidak dipakai).</div>
+    <div class="modal-sub">Pilih siswa agar pendapatan terhubung ke unit sekolah yang benar.</div>
+    <label>Pilih siswa</label>
+    <select id="bi_student" onchange="syncInvoiceStudent()"></select>
     <label>Keluarga</label>
     <select id="bi_parent"></select>
     <div id="bi_items"></div>
@@ -508,7 +610,162 @@
   </div>
 </div>
 
+<!-- Unit modal -->
+<div class="modal-bg" id="unitModal">
+  <div class="modal" style="max-width:540px">
+    <h3 id="um_title">Add unit</h3>
+    <div class="modal-sub">Units are configurable, not a fixed list. Codes are permanent and never reused.</div>
+    <div class="row2">
+      <div><label>Unit code</label><input id="um_code" placeholder="e.g. SD"></div>
+      <div><label>Display name</label><input id="um_name" placeholder="e.g. Elementary School"></div>
+    </div>
+    <div class="row2">
+      <div><label>Type / category</label><select id="um_type"><option value="elementary">Elementary</option><option value="tk">TK</option><option value="middle">Middle</option><option value="high">High</option><option value="central">Central/Yayasan</option><option value="other">Other</option></select></div>
+      <div><label>Sort order</label><input id="um_sort" type="number" value="0"></div>
+    </div>
+    <div class="row2">
+      <div><label>Status</label><select id="um_status"><option value="active">Active</option><option value="inactive">Inactive</option></select></div>
+      <div><label>Campus</label><input id="um_campus" placeholder="optional"></div>
+    </div>
+    <label>Address</label>
+    <input id="um_address" placeholder="optional">
+    <div class="row2">
+      <div><label>Contact email</label><input id="um_email" placeholder="optional"></div>
+      <div><label>Contact phone</label><input id="um_phone" placeholder="optional"></div>
+    </div>
+    <label>Invoice / report header text</label>
+    <input id="um_header" placeholder="optional one-line note shown on documents">
+    <label>Unit logo (PNG, JPG, or WebP, max 2 MB)</label>
+    <input id="um_logo" type="file" accept="image/png,image/jpeg,image/webp">
+    <div id="um_logo_preview" style="margin-top:8px"></div>
+    <div class="err" id="um_err"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('unitModal')">Cancel</button>
+      <button class="btn btn-primary" id="um_save" onclick="saveUnit()">Save unit</button>
+    </div>
+  </div>
+</div>
+
+<!-- Expense modal -->
+<div class="modal-bg" id="expenseModal">
+  <div class="modal">
+    <h3 id="em_title">Add expense</h3>
+    <div class="modal-sub">Four quick fields. The expense will appear in its month's report.</div>
+    <div class="row2">
+      <div><label for="em_date">Date</label><input id="em_date" type="date"><div class="quick-date-row"><button type="button" onclick="setExpenseDate('today')">Today</button><button type="button" onclick="setExpenseDate('yesterday')">Yesterday</button><button type="button" onclick="setExpenseDate('month-start')">First day</button></div></div>
+      <div><label for="em_unit">Level / unit</label><select id="em_unit"></select></div>
+    </div>
+    <label for="em_desc">Detail</label>
+    <textarea id="em_desc" placeholder="e.g. Classroom supplies and printing" required></textarea>
+    <label for="em_amount">Total</label>
+    <div class="money-input"><span>Rp</span><input id="em_amount" inputmode="numeric" autocomplete="off" placeholder="0" oninput="formatExpenseAmountInput()" required></div>
+    <div class="field-note">Thousands separators are added automatically, for example 1.250.000.</div>
+    <div class="expense-post-note">Saved as a paid expense so it appears immediately in the selected month's report.</div>
+    <input id="em_category" type="hidden" value="General"><input id="em_vendor" type="hidden"><input id="em_ref" type="hidden"><input id="em_attach" type="hidden"><input id="em_status" type="hidden" value="draft">
+    <div class="err" id="em_err"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('expenseModal')">Cancel</button>
+      <button class="btn btn-primary" id="em_save" onclick="saveExpense()">Save expense</button>
+    </div>
+  </div>
+</div>
+
+<!-- Tuition schedule modal -->
+<div class="modal-bg" id="scheduleModal">
+  <div class="modal">
+    <h3 id="sc_title">Add tuition schedule</h3>
+    <div class="modal-sub">One active schedule per unit + component + term. Leave a component out if it does not apply.</div>
+    <div class="row2">
+      <div><label>School unit</label><select id="sc_unit"></select></div>
+      <div><label>Term</label><select id="sc_term"><option value="">— none / all terms —</option></select></div>
+    </div>
+    <div class="row2">
+      <div><label>Fee component</label><select id="sc_component"></select></div>
+      <div><label>Amount (Rp)</label><input id="sc_amount" inputmode="numeric" placeholder="e.g. 2.400.000"></div>
+    </div>
+    <div class="row2">
+      <div><label>Billing frequency</label><select id="sc_frequency"><option value="monthly">Monthly</option><option value="term">Term</option><option value="semester">Semester</option><option value="annual">Annual</option><option value="one_time">One-time</option><option value="weekly">Weekly</option></select></div>
+      <div><label>Due day (1-31)</label><input id="sc_dueday" type="number" min="1" max="31" placeholder="optional"></div>
+    </div>
+    <div class="row2">
+      <div><label>Effective from</label><input id="sc_start" type="date"></div>
+      <div><label>Effective until</label><input id="sc_end" type="date"></div>
+    </div>
+    <label>Status</label>
+    <select id="sc_status"><option value="active">Active</option><option value="inactive">Inactive</option></select>
+    <div class="err" id="sc_err"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('scheduleModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveSchedule()">Save schedule</button>
+    </div>
+  </div>
+</div>
+
+<!-- Student override modal -->
+<div class="modal-bg" id="overrideModal">
+  <div class="modal">
+    <h3 id="ov_title">Add student tuition override</h3>
+    <div class="modal-sub">Overrides take precedence over the unit schedule for the same period. A reason is always required.</div>
+    <label>Student</label>
+    <select id="ov_student"></select>
+    <div class="row2">
+      <div><label>School unit</label><select id="ov_unit"></select></div>
+      <div><label>Fee component</label><select id="ov_component"></select></div>
+    </div>
+    <div class="row2">
+      <div><label>Override amount (Rp)</label><input id="ov_amount" inputmode="numeric" placeholder="e.g. 2.000.000"></div>
+      <div><label>Status</label><select id="ov_status"><option value="active">Active</option><option value="inactive">Inactive</option></select></div>
+    </div>
+    <div class="row2">
+      <div><label>Effective from</label><input id="ov_start" type="date"></div>
+      <div><label>Effective until</label><input id="ov_end" type="date"></div>
+    </div>
+    <label>Reason</label>
+    <textarea id="ov_reason" placeholder="e.g. Sibling discount, scholarship"></textarea>
+    <div class="err" id="ov_err"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('overrideModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveOverride()">Save override</button>
+    </div>
+  </div>
+</div>
+
+<!-- Invoice generation preview modal -->
+<div class="modal-bg" id="genModal">
+  <div class="modal" style="max-width:900px">
+    <h3>Preview: generate Uang Sekolah</h3>
+    <div class="modal-sub" id="gen_sub">Review each student before generating. Exclude any student or adjust a draft amount before confirming.</div>
+    <div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-bottom:14px">
+      <div><label style="display:block;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--slate);margin-bottom:4px">Billing frequency</label><select id="gen_frequency" onchange="openGeneratePreview()" style="padding:8px 10px;border:1px solid var(--hairline);border-radius:var(--radius)"><option value="monthly">Monthly</option><option value="term">Term</option></select></div>
+      <div id="gen_month_wrap"><label style="display:block;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--slate);margin-bottom:4px">Billing month</label><input id="gen_month" type="month" onchange="openGeneratePreview()" style="padding:8px 10px;border:1px solid var(--hairline);border-radius:var(--radius)"></div>
+    </div>
+    <div style="max-height:52vh;overflow:auto" id="gen_body"></div>
+    <div class="err" id="gen_err"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('genModal')">Cancel run</button>
+      <button class="btn btn-primary" id="gen_confirm" onclick="confirmGenerate()">Confirm &amp; generate</button>
+    </div>
+  </div>
+</div>
+
+<!-- Removal confirmation modal (archive / void / delete with reason) -->
+<div class="modal-bg" id="removalModal">
+  <div class="modal">
+    <h3 id="rm_title">Confirm</h3>
+    <div class="modal-sub" id="rm_desc">This action needs a reason and will be recorded in History.</div>
+    <div id="rm_consequence" style="font-size:12px;color:var(--rust);margin-bottom:6px"></div>
+    <label>Reason (required)</label>
+    <textarea id="rm_reason" placeholder="Why is this happening?"></textarea>
+    <div class="err" id="rm_err"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('removalModal')">Cancel</button>
+      <button class="btn btn-primary" id="rm_confirm" style="background:var(--rust)" onclick="confirmRemoval()">Confirm</button>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/i18n.js"></script>
 <script>
 // ===== Config =====
 const SUPABASE_URL = 'https://gthlpszvpvtoqkodbeaa.supabase.co';
@@ -517,10 +774,84 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // ===== Globals =====
 let TERM=null, ALLTERMS=[], CFG={}, BANK={}, STUDENTS=[], PARENTS=[], INVOICES=[], CLASSES=[], TEACHERS=[], STAFF=[], ATTENDANCE=[], INCIDENTS=[], ENROLLMENTS=[], HISTORY=[], DELETED_DATA=[];
+let UNITS=[], SCHEDULES=[], OVERRIDES=[], EXPENSES=[], INVOICE_LINES=[], ALL_STUDENTS=[];
+let INCLUDE_ARCHIVED = false;
 let ACTIVE='overview';
+let CURRENT_ROLE='owner';
 
 // ===== Helpers =====
-const rp = n => 'Rp ' + (Number(n)||0).toLocaleString('id-ID');
+// ===== Number & currency formatting (testable block) =====
+const FORMATTING = (() => {
+  function normalizeNumber(raw){
+    if (raw === null || raw === undefined) return null;
+    if (typeof raw === 'number') return Number.isFinite(raw) ? raw : null;
+    let s = String(raw).trim();
+    if (s === '') return null;
+    s = s.replace(/^(Rp|IDR)\s*/i, '');
+    if (/[^0-9.,\-\s\u00A0\u202F]/.test(s)) return null;
+    s = s.replace(/[\s\u00A0\u202F]/g, '');
+    if (s === '' || s === '-' || s === '.' || s === ',') return null;
+    const neg = s.startsWith('-');
+    if (neg) s = s.slice(1);
+    if (s.includes('-')) return null;
+    const hasComma = s.includes(','), hasDot = s.includes('.');
+    let value;
+    if (hasComma && hasDot) {
+      const lastComma = s.lastIndexOf(','), lastDot = s.lastIndexOf('.');
+      if (lastComma > lastDot) {
+        value = Number(s.slice(0, lastComma).replace(/\./g, '') + '.' + s.slice(lastComma + 1));
+      } else {
+        value = Number(s.slice(0, lastDot).replace(/,/g, '') + '.' + s.slice(lastDot + 1));
+      }
+    } else if (hasComma) {
+      const after = s.slice(s.lastIndexOf(',') + 1);
+      value = after.length === 3 ? Number(s.replace(/,/g, '')) : Number(s.replace(/,/g, '.'));
+    } else if (hasDot) {
+      const after = s.slice(s.lastIndexOf('.') + 1);
+      value = after.length === 3 ? Number(s.replace(/\./g, '')) : Number(s);
+    } else {
+      value = Number(s);
+    }
+    if (!Number.isFinite(value)) return null;
+    return neg ? -value : value;
+  }
+  function formatIntegerID(raw){
+    const n = normalizeNumber(raw);
+    const v = (n === null) ? 0 : n;
+    return Math.trunc(v).toLocaleString('id-ID');
+  }
+  function formatCurrencyIDR(raw){
+    const n = normalizeNumber(raw);
+    const v = (n === null) ? 0 : n;
+    const neg = v < 0;
+    const abs = Math.abs(Math.trunc(v));
+    return (neg ? '-Rp ' : 'Rp ') + abs.toLocaleString('id-ID');
+  }
+  function parseLocalizedNumber(display){ return normalizeNumber(display); }
+  function formatAmountInput(raw){
+    const n = normalizeNumber(raw);
+    if (n === null) return '';
+    return Math.trunc(n).toLocaleString('id-ID');
+  }
+  function isValidAmount(raw, opts){
+    const o = opts || {};
+    const allowZero = !!o.allowZero, allowNegative = !!o.allowNegative, allowDecimal = !!o.allowDecimal;
+    const n = normalizeNumber(raw);
+    if (n === null) return { valid:false, value:null, reason:'invalid' };
+    if (!allowDecimal && !Number.isInteger(n)) return { valid:false, value:n, reason:'decimal' };
+    if (!allowNegative && n < 0) return { valid:false, value:n, reason:'negative' };
+    if (!allowZero && n === 0) return { valid:false, value:n, reason:'zero' };
+    return { valid:true, value:n, reason:null };
+  }
+  return { normalizeNumber, formatIntegerID, formatCurrencyIDR, parseLocalizedNumber, formatAmountInput, isValidAmount };
+})();
+const formatCurrencyIDR = FORMATTING.formatCurrencyIDR;
+const formatIntegerID = FORMATTING.formatIntegerID;
+const parseLocalizedNumber = FORMATTING.parseLocalizedNumber;
+const formatAmountInput = FORMATTING.formatAmountInput;
+const isValidAmount = FORMATTING.isValidAmount;
+// ===== /Number & currency formatting =====
+const rp = n => formatCurrencyIDR(n);
 const daysBetween = (a,b) => Math.round((b-a)/86400000);
 const el = id => document.getElementById(id);
 const esc = s => (s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -533,6 +864,7 @@ async function logAudit(action, detail){
 
 const CORE_BACKUP_TABLES = ['admin_users','attendance','audit_log','classes','enrollments','grades','incidents','invoices','parents','school_settings','students','terms'];
 const ACCOUNTABILITY_BACKUP_TABLES = ['change_history','deleted_data'];
+const EXTENSION_BACKUP_TABLES = ['org_units','tuition_schedules','student_tuition_overrides','invoice_lines','expenses'];
 function setBackupStatus(message, type='info'){
   const box = el('backup_status'); if(!box) return;
   box.textContent = message;
@@ -542,7 +874,7 @@ function exportFormat(){ return el('backup_format').value==='csv' ? 'csv' : 'jso
 function updateExportFormatHint(){
   const hint=el('backup_format_hint'); if(!hint) return;
   hint.textContent = exportFormat()==='csv'
-    ? 'Creates one CSV file per table plus a manifest. Your browser may ask to allow multiple downloads.'
+    ? 'Creates one flattened CSV file with a source_table column for every row.'
     : 'Creates one complete JSON file. This is the best format for keeping all table relationships together.';
 }
 function renderBackupStatus(){
@@ -605,7 +937,7 @@ function allTablesToCsv(tables){
 }
 async function backupTablesForExport(){
   const tables=[...CORE_BACKUP_TABLES], unavailable=[];
-  for(const table of ACCOUNTABILITY_BACKUP_TABLES){
+  for(const table of [...ACCOUNTABILITY_BACKUP_TABLES, ...EXTENSION_BACKUP_TABLES]){
     const { error } = await sb.from(table).select('id').limit(1);
     if(error) unavailable.push(table); else tables.push(table);
   }
@@ -658,12 +990,25 @@ async function checkAuthState(){
   const { data:{ session } } = await sb.auth.getSession();
   if(!session){ showLogin(); return; }
   const { data:me } = await sb.from('admin_users').select('name,role,status').eq('id', session.user.id).single();
-  if(!me || me.role!=='owner' || me.status!=='approved'){
+  if(!me || !['owner','admin'].includes(me.role) || me.status!=='approved'){
     el('loginErr').style.color='var(--rust)';
-    el('loginErr').textContent = 'This account is not an approved owner.';
+    el('loginErr').textContent = 'This account is not an approved Headmaster or administrator.';
     await sb.auth.signOut(); showLogin(); return;
   }
+  CURRENT_ROLE = me.role;
   el('userName').textContent = me.name;
+  el('userRoleLabel').textContent = me.role==='owner' ? 'Headmaster' : 'Administrator';
+  document.querySelectorAll('#nav button').forEach(button => {
+    const adminView = ['tuition','units','expenses','finance'].includes(button.dataset.view);
+    button.style.display = me.role==='admin' && !adminView ? 'none' : '';
+  });
+  document.querySelectorAll('[data-owner-only]').forEach(node=>node.style.display=me.role==='owner'?'':'none');
+  if(me.role==='admin'){
+    ACTIVE='finance';
+    document.querySelectorAll('#nav button').forEach(button=>button.classList.toggle('active',button.dataset.view==='finance'));
+    ['overview','enrollment','tuition','attendance','grades','incidents','settings','history','units','expenses','finance'].forEach(v =>
+      el('view-'+v).style.display = v==='finance' ? 'block' : 'none');
+  }
   el('login').style.display='none';
   el('app').style.display='grid';
   loadAll();
@@ -684,20 +1029,58 @@ el('nav').addEventListener('click', e => {
   const btn = e.target.closest('button'); if(!btn) return;
   ACTIVE = btn.dataset.view;
   [...el('nav').children].forEach(b => b.classList.toggle('active', b===btn));
-  ['overview','enrollment','tuition','attendance','grades','incidents','settings','history'].forEach(v =>
+  ['overview','enrollment','tuition','attendance','grades','incidents','settings','history','units','expenses','finance'].forEach(v =>
     el('view-'+v).style.display = (v===ACTIVE ? 'block' : 'none'));
   refreshActiveView();
 });
 
 // ===== Load =====
+let SETUP = { errors: [], missing: {}, denied: {} };
+function classifyFetchError(error){
+  const m = (error && error.message) || String(error||'');
+  const code = error && error.code;
+  if(/Could not find the table|relation .* does not exist|does not exist|PGRST205|42P01/i.test(m) || code==='42P01' || code==='PGRST205') return 'missing_migration';
+  if(/permission denied|not authorized|row-level security|JWT|PGRST301|42501/i.test(m) || code==='42501' || code==='PGRST301') return 'denied';
+  if(/fetch failed|network|Failed to fetch|ECONN|ENOTFOUND/i.test(m)) return 'network';
+  return 'error';
+}
+async function fetchExtensionTable(table, orderCol){
+  try{
+    let q = sb.from(table).select('*');
+    if(orderCol) q = q.order(orderCol);
+    const { data, error } = await q;
+    if(error) return { table, ok:false, data:[], error:error.message||String(error), kind:classifyFetchError(error) };
+    return { table, ok:true, data:data||[], error:null, kind:null };
+  }catch(e){
+    return { table, ok:false, data:[], error:e.message||String(e), kind:classifyFetchError(e) };
+  }
+}
+function renderSetupBanner(){
+  const box = el('setupBanner');
+  if(!box) return;
+  const missing = Object.keys(SETUP.missing||{});
+  const denied = Object.keys(SETUP.denied||{});
+  const errors = (SETUP.errors||[]);
+  if(!missing.length && !denied.length && !errors.length){ box.style.display='none'; return; }
+  const lines = [];
+  if(missing.length) lines.push('Missing migration/tables: ' + missing.join(', ') + '. Run the Phase 1 migrations (007-013) before using Units, Tuition, Expenses, or Finance.');
+  if(denied.length) lines.push('Access denied to: ' + denied.join(', ') + '. Check Row Level Security and the owner role.');
+  if(errors.length) lines.push('Load errors: ' + errors.slice(0,4).join('; '));
+  box.innerHTML = '<strong>Setup problem detected.</strong><br>' + lines.map(esc).join('<br>');
+  box.style.display='block';
+}
 async function loadAll(){
+  SETUP = { errors: [], missing: {}, denied: {} };
   const term = await sb.from('terms').select('*').eq('is_active', true).limit(1).maybeSingle();
   TERM = term.data || null;
+  if(term.error) SETUP.errors.push('terms: '+term.error.message);
   const allTerms = await sb.from('terms').select('*').order('start_date');
   ALLTERMS = allTerms.data || [];
-  const [settings, students, parents, invoices, classes, teachers, attendance, incidents, enrollments] = await Promise.all([
+  if(allTerms.error) SETUP.errors.push('terms(all): '+allTerms.error.message);
+
+  const core = await Promise.all([
     sb.from('school_settings').select('config,bank_name,bank_account').eq('id',1).maybeSingle(),
-    sb.from('students').select('*').eq('status','active').order('name'),
+    sb.from('students').select('*').order('name'),
     sb.from('parents').select('*'),
     sb.from('invoices').select('*, parents(name,phone,email)'),
     sb.from('classes').select('*, enrollments(count)').order('name'),
@@ -706,17 +1089,43 @@ async function loadAll(){
     sb.from('incidents').select('*, students(name)').order('created_at',{ascending:false}).limit(8),
     sb.from('enrollments').select('*')
   ]);
-  CFG         = settings.data?.config || {};
-  BANK        = { name: settings.data?.bank_name || '', account: settings.data?.bank_account || '' };
-  STUDENTS    = students.data || [];
-  PARENTS     = parents.data || [];
-  INVOICES    = invoices.data || [];
-  CLASSES     = classes.data || [];
-  STAFF       = teachers.data || [];
+  const coreNames = ['school_settings','students','parents','invoices','classes','admin_users','attendance','incidents','enrollments'];
+  core.forEach((r,i)=>{ if(r && r.error) SETUP.errors.push(coreNames[i]+': '+r.error.message); });
+
+  const [settings, students, parents, invoices, classes, teachers, attendance, incidents, enrollments] = core;
+  CFG         = settings?.data?.config || {};
+  BANK        = { name: settings?.data?.bank_name || '', account: settings?.data?.bank_account || '' };
+  ALL_STUDENTS = students?.data || [];
+  STUDENTS    = ALL_STUDENTS.filter(s=>s.status!=='inactive');
+  PARENTS     = parents?.data || [];
+  INVOICES    = invoices?.data || [];
+  CLASSES     = classes?.data || [];
+  STAFF       = teachers?.data || [];
   TEACHERS    = STAFF.filter(t=>t.status==='approved');
-  ATTENDANCE  = attendance.data || [];
-  INCIDENTS   = incidents.data || [];
-  ENROLLMENTS = enrollments.data || [];
+  ATTENDANCE  = attendance?.data || [];
+  INCIDENTS   = incidents?.data || [];
+  ENROLLMENTS = enrollments?.data || [];
+
+  const extResults = await Promise.all([
+    fetchExtensionTable('org_units', 'sort_order'),
+    fetchExtensionTable('tuition_schedules', 'fee_component'),
+    fetchExtensionTable('student_tuition_overrides', 'effective_start'),
+    fetchExtensionTable('expenses', 'expense_date'),
+    fetchExtensionTable('invoice_lines', 'created_at')
+  ]);
+  const ext = {}; extResults.forEach(r=>ext[r.table]=r);
+  UNITS         = ext['org_units'].data;
+  SCHEDULES     = ext['tuition_schedules'].data;
+  OVERRIDES     = ext['student_tuition_overrides'].data;
+  EXPENSES      = ext['expenses'].data;
+  INVOICE_LINES = ext['invoice_lines'].data;
+  extResults.forEach(r=>{
+    if(r.ok) return;
+    if(r.kind==='missing_migration') SETUP.missing[r.table]=r.error;
+    else if(r.kind==='denied') SETUP.denied[r.table]=r.error;
+    else SETUP.errors.push(r.table+': '+r.error);
+  });
+  renderSetupBanner();
   refreshActiveView();
 }
 
@@ -731,13 +1140,16 @@ function refreshActiveView(){
   if(ACTIVE==='incidents'){ renderIncidentsTab(); }
   if(ACTIVE==='settings'){ renderSettings(); }
   if(ACTIVE==='history'){ renderHistory(); }
+  if(ACTIVE==='units'){ renderUnits(); }
+  if(ACTIVE==='expenses'){ renderExpenses(); }
+  if(ACTIVE==='finance'){ renderFinance(); }
 }
 
 function renderMasthead(){
   const hour = new Date().getHours();
   const part = hour<12 ? 'morning' : hour<18 ? 'afternoon' : 'evening';
   el('greeting').textContent = `Good ${part}, ${el('userName').textContent}`;
-  el('dateline').textContent = new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  el('dateline').textContent = new Date().toLocaleDateString(window.SantaI18n?SantaI18n.locale():'en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
   el('termTag').textContent = TERM ? TERM.label : 'No active term';
 }
 
@@ -761,7 +1173,7 @@ function renderKpis(){
   } else { el('kpiAttendance').textContent='—'; el('kpiAttendanceSub').textContent='No attendance marked yet'; }
 }
 function teacherName(id){ const t = TEACHERS.find(t=>t.id===id); return t ? t.name : 'Unassigned'; }
-function activeClasses(){ return TERM ? CLASSES.filter(c=>c.term_id===TERM.id) : CLASSES; }
+function activeClasses(){ return TERM ? CLASSES.filter(c=>c.term_id===TERM.id && c.status!=='closed') : CLASSES.filter(c=>c.status!=='closed'); }
 function renderLedger(){
   const box = el('ledger');
   const cls = activeClasses();
@@ -795,7 +1207,7 @@ async function openStudent(id){
   const parent = PARENTS.find(p=>p.id===s.parent_id) || {};
   const cid = classOfStudent(id); const cls = CLASSES.find(c=>c.id===cid);
   el('s360bg').classList.add('open');
-  el('s360').innerHTML = `<div class="d-head"><button class="d-close" onclick="closeStudent()">×</button><h2>${esc(s.name)}</h2><div class="d-meta">${esc(s.grade_level||'')} · ${esc(cls?cls.name:'not enrolled')}</div><div style="margin-top:12px;display:flex;gap:8px"><button class="btn btn-ghost" style="background:rgba(255,255,255,.12);color:#fff;border-color:rgba(255,255,255,.3)" onclick="openEditStudent('${s.id}')">Edit</button><button class="btn btn-ghost" style="background:rgba(255,255,255,.12);color:#fff;border-color:rgba(255,255,255,.3)" onclick="deleteStudent('${s.id}')">Delete</button></div></div><div class="d-body"><div class="d-empty">Loading…</div></div>`;
+  el('s360').innerHTML = `<div class="d-head"><button class="d-close" onclick="closeStudent()">×</button><h2>${esc(s.name)}</h2><div class="d-meta">${esc(s.grade_level||'')} · ${esc(cls?cls.name:'not enrolled')}</div><div style="margin-top:12px;display:flex;gap:8px"><button class="btn btn-ghost" style="background:rgba(255,255,255,.12);color:#fff;border-color:rgba(255,255,255,.3)" onclick="openEditStudent('${s.id}')">Edit</button><button class="btn btn-ghost" style="background:rgba(255,255,255,.12);color:#fff;border-color:rgba(255,255,255,.3)" onclick="archiveStudent('${s.id}')">Archive</button><button class="btn btn-ghost" style="background:rgba(255,255,255,.12);color:#fff;border-color:rgba(255,255,255,.3)" onclick="deleteStudent('${s.id}')">Delete</button></div></div><div class="d-body"><div class="d-empty">Loading…</div></div>`;
 
   const [grades, att, incidents] = await Promise.all([
     sb.from('grades').select('*').eq('student_id',id),
@@ -903,20 +1315,35 @@ function classOfStudent(studentId){
 }
 function renderStudents(){
   const box = el('studentsTable');
-  if(!STUDENTS.length){ box.innerHTML='<div class="empty">No students yet. Click “Add student” to enrol the first one.</div>'; return; }
+  const list = INCLUDE_ARCHIVED ? ALL_STUDENTS : STUDENTS;
+  if(!list.length){ box.innerHTML= INCLUDE_ARCHIVED ? '<div class="empty">No students at all.</div>' : '<div class="empty">No students yet. Click “Add student” to enrol the first one.</div>'; return; }
   const classOptions = cid => ['<option value="">— not enrolled —</option>'].concat(
     activeClasses().map(c=>`<option value="${c.id}" ${c.id===cid?'selected':''}>${esc(c.name)}</option>`)).join('');
-  box.innerHTML = `<table><thead><tr><th>Student</th><th>Grade</th><th>Parent</th><th>Class (this term)</th></tr></thead><tbody>${
-    STUDENTS.map(s=>{
+  box.innerHTML = `<table><thead><tr><th>Student</th><th>Grade</th><th>Parent</th><th>Class (this term)</th><th>Status</th></tr></thead><tbody>${
+    list.map(s=>{
       const cid = classOfStudent(s.id);
-      return `<tr><td><a onclick="openStudent('${s.id}')" style="cursor:pointer;text-decoration:underline;text-underline-offset:2px"><strong>${esc(s.name)}</strong></a></td><td>${esc(s.grade_level||'—')}</td><td>${esc(parentName(s.parent_id))}</td><td><select class="inline" onchange="setEnrollment('${s.id}', this.value)">${classOptions(cid)}</select></td></tr>`;
+      const archived = s.status==='inactive';
+      const statusCell = archived ? `<span class="stamp pending">Archived</span> <button class="btn btn-ghost" onclick="restoreStudent('${s.id}')">Restore</button>` : '<span class="stamp paid">Active</span>';
+      return `<tr><td><a onclick="openStudent('${s.id}')" style="cursor:pointer;text-decoration:underline;text-underline-offset:2px"><strong>${esc(s.name)}</strong></a></td><td>${esc(s.grade_level||'—')}</td><td>${esc(parentName(s.parent_id))}</td><td>${archived?'<span class="sub">—</span>':`<select class="inline" onchange="setEnrollment('${s.id}', this.value)">${classOptions(cid)}</select>`}</td><td>${statusCell}</td></tr>`;
     }).join('')
   }</tbody></table>`;
 }
 async function setEnrollment(studentId, classId){
-  if(!TERM){ alert('No active term set. Create one in Supabase first.'); return; }
-  await sb.from('enrollments').delete().eq('student_id', studentId).eq('term_id', TERM.id);
-  if(classId){
+  if(!TERM){ alert('No active term set. Create one in Settings first.'); return; }
+  const existing = ENROLLMENTS.find(e=>e.student_id===studentId && e.term_id===TERM.id && e.status==='enrolled');
+  if(!classId){
+    if(existing){
+      openRemoval({ kind:'withdraw_enrollment', id:existing.id, title:'Withdraw enrollment',
+        description:'Withdraw this student from their class for the active term?',
+        consequence:'The enrollment is kept with status "withdrawn" and the reason is recorded in History.',
+        confirmLabel:'Withdraw' });
+    }
+    return;
+  }
+  if(existing){
+    const { error } = await sb.from('enrollments').update({ class_id:classId }).eq('id', existing.id);
+    if(error){ alert('Could not move student: '+error.message); }
+  } else {
     const { error } = await sb.from('enrollments').insert({ student_id:studentId, class_id:classId, term_id:TERM.id, status:'enrolled' });
     if(error){ alert('Could not enrol: '+error.message); }
   }
@@ -931,7 +1358,8 @@ function renderClasses(){
   box.innerHTML = `<table><thead><tr><th>Class</th><th>Teacher</th><th>Room</th><th>Schedule</th><th>Enrolled</th><th>Actions</th></tr></thead><tbody>${
     cls.map(c=>{
       const count = c.enrollments?.[0]?.count ?? 0;
-      return `<tr><td><strong>${esc(c.name)}</strong></td><td>${esc(teacherName(c.teacher_id))}</td><td>${esc(c.room||'—')}</td><td class="sub">${esc(c.schedule||'—')}</td><td>${count} / ${c.capacity||25}</td><td style="white-space:nowrap"><button class="btn btn-ghost" onclick="openEditClass('${c.id}')">Edit</button> <button class="btn btn-ghost" onclick="deleteClass('${c.id}')">Delete</button></td></tr>`;
+      const closeBtn = c.status!=='closed' ? ` <button class="btn btn-ghost" onclick="closeClass('${c.id}')">Close</button>` : '';
+      return `<tr><td><strong>${esc(c.name)}</strong>${c.status==='closed'?' <span class="stamp pending">Closed</span>':''}</td><td>${esc(teacherName(c.teacher_id))}</td><td>${esc(c.room||'—')}</td><td class="sub">${esc(c.schedule||'—')}</td><td>${count} / ${c.capacity||25}</td><td style="white-space:nowrap"><button class="btn btn-ghost" onclick="openEditClass('${c.id}')">Edit</button>${closeBtn} <button class="btn btn-ghost" onclick="deleteClass('${c.id}')">Delete</button></td></tr>`;
     }).join('')
   }</tbody></table>`;
 }
@@ -992,16 +1420,6 @@ async function saveStudent(){
   closeModal('studentModal');
   await loadAll();
 }
-async function deleteStudent(id){
-  const s = STUDENTS.find(x=>x.id===id); if(!s) return;
-  if(!confirm(`Delete ${s.name}? This removes their enrollment, attendance, and grades. This cannot be undone.`)) return;
-  const { error } = await sb.from('students').delete().eq('id', id);
-  if(error){ alert('Could not delete: '+error.message); return; }
-  logAudit('student.delete', s.name);
-  closeStudent();
-  await loadAll();
-}
-
 function openAddClass(){
   EDIT_CID = null;
   el('cm_title').textContent = 'Add class';
@@ -1030,14 +1448,6 @@ async function saveClass(){
   closeModal('classModal');
   await loadAll();
 }
-async function deleteClass(id){
-  const c = CLASSES.find(x=>x.id===id); if(!c) return;
-  if(!confirm(`Delete class "${c.name}"? This removes its roster, attendance, and grades for this class. This cannot be undone.`)) return;
-  const { error } = await sb.from('classes').delete().eq('id', id);
-  if(error){ alert('Could not delete: '+error.message); return; }
-  await loadAll();
-}
-
 function openImport(){ el('imp_text').value=''; el('imp_err').textContent=''; el('importModal').classList.add('open'); }
 async function runImport(){
   const err = el('imp_err'); err.textContent=''; err.style.color='var(--rust)';
@@ -1128,6 +1538,7 @@ function renderTerms(){
       let actions = '';
       if(!active) actions += `<button class="btn btn-primary" onclick="setActiveTerm('${t.id}')">Set active</button> `;
       if(!active && TERM) actions += `<button class="btn btn-ghost" onclick="copyRoster('${t.id}')">Bring students from active term</button>`;
+      if(active) actions += `<button class="btn btn-ghost" onclick="deactivateTerm('${t.id}')">Deactivate</button>`;
       return `<tr><td><strong>${esc(t.label)}</strong></td><td class="sub">${esc(t.start_date||'')} → ${esc(t.end_date||'')}</td><td>${rp(t.tuition_fee_default)}</td><td>${active?'<span class="stamp paid">Active</span>':'<span class="stamp pending">Inactive</span>'}</td><td style="white-space:nowrap">${actions||'<span class="sub">—</span>'}</td></tr>`;
     }).join('')
   }</tbody></table>`;
@@ -1138,7 +1549,7 @@ async function addTerm(){
   if(!label){ msg.style.color='var(--rust)'; msg.textContent='Term label is required.'; return; }
   const { error } = await sb.from('terms').insert({
     label, start_date:el('tm_start').value||null, end_date:el('tm_end').value||null,
-    tuition_fee_default:parseInt(el('tm_fee').value)||0, is_active:false
+    tuition_fee_default:parseLocalizedNumber(el('tm_fee').value)||0, is_active:false
   });
   if(error){ msg.style.color='var(--rust)'; msg.textContent='Could not add: '+error.message; return; }
   el('tm_label').value=''; el('tm_start').value=''; el('tm_end').value=''; el('tm_fee').value='';
@@ -1231,14 +1642,6 @@ function setHistoryStatus(message, isError=false){
   box.style.color=isError ? 'var(--rust)' : 'var(--slate)';
   box.setAttribute('role',isError ? 'alert' : 'status');
 }
-function historyTime(value){ return value ? new Date(value).toLocaleString('en-GB',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '—'; }
-function historySummary(item){
-  if(item.action==='UPDATE'){
-    const fields=Object.keys(item.changed_fields||{});
-    return fields.length ? 'Changed: '+fields.join(', ') : 'Record updated.';
-  }
-  return item.action==='INSERT' ? 'Record created.' : item.action==='DELETE' ? 'Record deleted and archived.' : 'Record changed.';
-}
 function jsonDetail(title, value){
   return `<h4 style="margin:18px 0 8px">${esc(title)}</h4><pre style="margin:0;padding:12px;background:var(--paper);border:1px solid var(--hairline);border-radius:var(--radius);white-space:pre-wrap;word-break:break-word;font-size:12px">${esc(JSON.stringify(value||{},null,2))}</pre>`;
 }
@@ -1248,34 +1651,38 @@ function openHistoryDetail(kind, id){
   const body=el('historyDetailBody');
   if(kind==='deleted'){
     el('historyDetailTitle').textContent='Deleted data details';
-    body.innerHTML=`<p class="sub">${esc(item.source_table||'record')} · ${esc(item.source_record_id||'—')} · deleted ${esc(historyTime(item.deleted_at))} by ${esc(item.deleted_by_email||'Unknown')}</p>${jsonDetail('Deletion metadata',item.metadata)}${jsonDetail('Saved record snapshot',item.deleted_data)}`;
+    const rows = [
+      ['Entity', item.source_table||'—'],
+      ['Record', item.record_label||item.source_record_id||'—'],
+      ['Deleted (Jakarta)', historyTime(item.deleted_at)],
+      ['Deleted by', (item.deleted_by_name?item.deleted_by_name+' · ':'')+(item.deleted_by_email||'Unknown')],
+      ['Reason', item.reason||'—'],
+      ['Source', item.source||'—'],
+      ['Correlation ID', item.correlation_id||'—'],
+      ['Transaction ID', item.transaction_id||'—']
+    ];
+    body.innerHTML = rows.map(r=>`<div class="d-row"><span class="k">${esc(r[0])}</span><span>${esc(r[1])}</span></div>`).join('')
+      + jsonDetail('Deletion metadata', item.metadata)
+      + jsonDetail('Saved record snapshot', item.deleted_data);
   } else {
     el('historyDetailTitle').textContent='Change history details';
-    body.innerHTML=`<p class="sub">${esc(item.action||'CHANGE')} · ${esc(item.table_name||'record')} · ${esc(item.record_id||'—')} · ${esc(historyTime(item.created_at))} by ${esc(item.actor_email||'Unknown')}</p>${jsonDetail('Changed fields',item.changed_fields)}${item.before_data?jsonDetail('Before',item.before_data):''}${item.after_data?jsonDetail('After',item.after_data):''}`;
+    const rows = [
+      ['Action', item.action||'CHANGE'],
+      ['Entity', item.table_name||'record'],
+      ['Record', item.record_label||item.record_id||'—'],
+      ['When (Jakarta)', historyTime(item.created_at)],
+      ['Actor', (item.actor_name?item.actor_name+' · ':'')+(item.actor_email||'System')],
+      ['Reason', item.reason||'—'],
+      ['Source', item.source||'—'],
+      ['Correlation ID', item.correlation_id||'—'],
+      ['Transaction ID', item.transaction_id||'—']
+    ];
+    body.innerHTML = rows.map(r=>`<div class="d-row"><span class="k">${esc(r[0])}</span><span>${esc(r[1])}</span></div>`).join('')
+      + jsonDetail('Changed fields', item.changed_fields)
+      + (item.before_data?jsonDetail('Before', item.before_data):'')
+      + (item.after_data?jsonDetail('After', item.after_data):'');
   }
   el('historyDetailModal').classList.add('open');
-}
-async function renderHistory(){
-  const historyBox=el('historyTable'), deletedBox=el('deletedDataTable');
-  historyBox.innerHTML='<div class="empty">Loading history…</div>';
-  deletedBox.innerHTML='<div class="empty">Loading deleted data…</div>';
-  setHistoryStatus('Loading the latest accountability records…');
-  const [historyResult, deletedResult] = await Promise.all([
-    sb.from('change_history').select('*').order('created_at',{ascending:false}).limit(200),
-    sb.from('deleted_data').select('*').order('deleted_at',{ascending:false}).limit(200)
-  ]);
-  if(historyResult.error || deletedResult.error){
-    const message=(historyResult.error||deletedResult.error).message||'Unknown error';
-    historyBox.innerHTML='<div class="empty">History is not ready yet.</div>';
-    deletedBox.innerHTML='<div class="empty">Deleted data is not ready yet.</div>';
-    setHistoryStatus('Run the change-history database migration, then press Refresh. '+message,true);
-    return;
-  }
-  HISTORY=historyResult.data||[];
-  DELETED_DATA=deletedResult.data||[];
-  setHistoryStatus(`Showing the latest ${HISTORY.length} changes and ${DELETED_DATA.length} deleted records.`);
-  historyBox.innerHTML=HISTORY.length ? `<table><thead><tr><th>When</th><th>Who</th><th>What</th><th>Record</th><th>Summary</th><th></th></tr></thead><tbody>${HISTORY.map(item=>`<tr><td class="sub" style="white-space:nowrap">${esc(historyTime(item.created_at))}</td><td class="sub">${esc(item.actor_email||'Unknown')}</td><td>${esc(item.action||'CHANGE')} ${esc(item.table_name||'')}</td><td class="sub">${esc(item.record_id||'—')}</td><td class="sub">${esc(historySummary(item))}</td><td><button class="btn btn-ghost" onclick="openHistoryDetail('change','${item.id}')">Details</button></td></tr>`).join('')}</tbody></table>` : '<div class="empty">No changes have been recorded since the history migration was installed.</div>';
-  deletedBox.innerHTML=DELETED_DATA.length ? `<table><thead><tr><th>When</th><th>Who</th><th>Source</th><th>Record</th><th></th></tr></thead><tbody>${DELETED_DATA.map(item=>`<tr><td class="sub" style="white-space:nowrap">${esc(historyTime(item.deleted_at))}</td><td class="sub">${esc(item.deleted_by_email||'Unknown')}</td><td>${esc(item.source_table||'')}</td><td class="sub">${esc(item.source_record_id||'—')}</td><td><button class="btn btn-ghost" onclick="openHistoryDetail('deleted','${item.id}')">Details</button></td></tr>`).join('')}</tbody></table>` : '<div class="empty">No deleted records have been archived since the history migration was installed.</div>';
 }
 function renderSettings(){
   fillConfig();
@@ -1307,7 +1714,7 @@ async function setStaff(id, status){
 function fillConfig(){
   const j = k => (Array.isArray(CFG[k]) ? CFG[k].join(', ') : '');
   el('cfg_name').value = (CFG.branding && CFG.branding.name) || 'Santa Aurelia';
-  el('cfg_tuition').value = TERM ? (TERM.tuition_fee_default||0) : 0;
+  el('cfg_tuition').value = TERM ? formatAmountInput(TERM.tuition_fee_default) : '';
   el('cfg_dueday').value = CFG.dueDayDefault || '';
   el('cfg_followup').value = CFG.followupDays || '';
   el('cfg_threshold').value = CFG.attendanceThreshold || 80;
@@ -1354,7 +1761,7 @@ async function saveConfig(){
   const { error } = await sb.from('school_settings').update({ config:newCfg, updated_at:new Date().toISOString() }).eq('id',1);
   if(error){ msg.style.color='var(--rust)'; msg.textContent='Could not save: '+error.message; return; }
   if(TERM){
-    const tuition = parseInt(el('cfg_tuition').value)||0;
+    const tuition = parseLocalizedNumber(el('cfg_tuition').value)||0;
     if(tuition !== Number(TERM.tuition_fee_default||0)){
       await sb.from('terms').update({ tuition_fee_default:tuition }).eq('id',TERM.id);
     }
@@ -1388,8 +1795,10 @@ function statusBadge(inv, overdue){
   return overdue ? '<span class="stamp overdue">Terlambat</span>' : '<span class="stamp pending">Belum Bayar</span>';
 }
 function renderTuition(){
+  renderSchedules();
+  renderOverrides();
   const box = el('tuitionTable');
-  if(!INVOICES.length){ box.innerHTML='<div class="empty">Belum ada invoice. Klik “Buat Invoice” atau “Generate Uang Sekolah”.</div>'; return; }
+  if(!INVOICES.length){ box.innerHTML='<div class="empty">Belum ada invoice. Klik “+ Buat Invoice” atau “Generate Uang Sekolah (preview)”.</div>'; return; }
   const today = new Date().toISOString().slice(0,10);
   const sorted = [...INVOICES].sort((a,b)=>(a.due_date||'').localeCompare(b.due_date||''));
   box.innerHTML = `<table><thead><tr><th>Keluarga</th><th>Rincian</th><th>Total</th><th>Terbayar</th><th>Sisa</th><th>Status</th><th>Aksi</th></tr></thead><tbody>${
@@ -1402,58 +1811,277 @@ function renderTuition(){
   }</tbody></table>`;
 }
 
-// Bulk: one Uang Sekolah invoice per enrolled family
-async function generateInvoices(){
+// ===== Billing logic (testable block) =====
+const BILLING_LOGIC = (() => {
+  function clampDay(year, month, day){
+    const d = new Date(Date.UTC(year, month, 1));
+    d.setUTCDate(0);
+    const lastDay = d.getUTCDate();
+    const dd = Math.min(day, lastDay);
+    return `${year}-${String(month).padStart(2,'0')}-${String(dd).padStart(2,'0')}`;
+  }
+  function monthBounds(monthYYYYMM){
+    const m = /^(\d{4})-(\d{2})$/.exec(String(monthYYYYMM||''));
+    if(!m) return null;
+    const y = +m[1], mo = +m[2];
+    return { start: `${m[1]}-${m[2]}-01`, end: clampDay(y, mo, 31) };
+  }
+  function periodBoundsFor(frequency, monthYYYYMM, term){
+    if(frequency === 'monthly') return monthBounds(monthYYYYMM);
+    if(frequency === 'term'){
+      if(!term || !term.start_date) return null;
+      return { start: term.start_date, end: term.end_date || term.start_date };
+    }
+    return null;
+  }
+  function dueDateForPeriod(frequency, period, dueDay, globalDueDay){
+    if(!period) return null;
+    if(frequency === 'monthly'){
+      const d = dueDay || globalDueDay;
+      if(!d) return period.start;
+      const m = /^(\d{4})-(\d{2})-/.exec(period.start);
+      return clampDay(+m[1], +m[2], d);
+    }
+    if(frequency === 'term'){
+      if(dueDay){
+        const d = new Date(period.start + 'T00:00:00Z');
+        d.setUTCDate(d.getUTCDate() + dueDay - 1);
+        const s = d.toISOString().slice(0,10);
+        return (period.end && s > period.end) ? period.end : s;
+      }
+      return period.start;
+    }
+    return null;
+  }
+  function covers(periodStart, periodEnd, effStart, effEnd){
+    // A price source must cover the WHOLE service period; partial overlap is
+    // not silently billed.
+    return (!effStart || effStart <= periodStart) && (!effEnd || effEnd >= periodEnd);
+  }
+  function resolveOverride(overrides, studentId, unitId, component, periodStart, periodEnd){
+    if(!unitId) return null;
+    const cands = (overrides||[]).filter(o=>o.student_id===studentId && o.status==='active'
+      && o.fee_component===component && o.org_unit_id===unitId
+      && covers(periodStart, periodEnd, o.effective_start, o.effective_end));
+    cands.sort((a,b)=>(b.effective_start||'').localeCompare(a.effective_start||''));
+    return cands[0] || null;
+  }
+  function resolveSchedule(schedules, unitId, termId, component, frequency, periodStart, periodEnd){
+    if(!unitId) return null;
+    const cands = (schedules||[]).filter(s=>s.status==='active' && s.fee_component===component
+      && s.org_unit_id===unitId
+      && s.frequency===frequency
+      && (s.term_id==null || s.term_id===termId)
+      && covers(periodStart, periodEnd, s.effective_start_date, s.effective_end_date));
+    // deterministic: exact term wins over all-term, then latest effective start
+    cands.sort((a,b)=>((b.term_id===termId?1:0)-(a.term_id===termId?1:0)) || (b.effective_start_date||'').localeCompare(a.effective_start_date||''));
+    return cands[0] || null;
+  }
+  function resolveTuition(studentId, unitId, termId, termDefault, overrides, schedules, component, frequency, periodStart, periodEnd){
+    const sc = resolveSchedule(schedules, unitId, termId, component, frequency, periodStart, periodEnd);
+    const ov = resolveOverride(overrides, studentId, unitId, component, periodStart, periodEnd);
+    if(ov) return { amount:Number(ov.amount||0), source:'override', override_id:ov.id, schedule_id:sc?sc.id:null, due_day:sc?sc.due_day:null, unit_id:ov.org_unit_id||unitId };
+    if(sc) return { amount:Number(sc.amount||0), source:'schedule', schedule_id:sc.id, override_id:null, due_day:sc.due_day, unit_id:sc.org_unit_id };
+    if(unitId && termDefault != null && Number(termDefault) > 0) return { amount:Number(termDefault), source:'legacy', schedule_id:null, override_id:null, due_day:null, unit_id:unitId };
+    return { amount:null, source:'none', schedule_id:null, override_id:null, due_day:null, unit_id:unitId };
+  }
+  function duplicateKey(studentId, component, unitId, periodStart, periodEnd){
+    return [studentId, component, unitId, periodStart||'epoch', periodEnd||'epoch'].join('::');
+  }
+  function jakartaDatePart(iso){
+    if(!iso) return '';
+    const d = new Date(iso); if(Number.isNaN(d.getTime())) return '';
+    try{ return new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Jakarta',year:'numeric',month:'2-digit',day:'2-digit'}).format(d); }
+    catch(e){ return iso.slice(0,10); }
+  }
+  return { clampDay, monthBounds, periodBoundsFor, dueDateForPeriod, covers, resolveOverride, resolveSchedule, resolveTuition, duplicateKey, jakartaDatePart };
+})();
+// ===== /Billing logic =====
+
+// ===== Tuition resolution (exact unit; override > schedule > legacy) =====
+const TUITION_COMPONENT = 'Uang Sekolah';
+function unitName(id){
+  if(!id) return 'Unassigned unit';
+  const u = UNITS.find(x=>x.id===id); return u ? u.name : 'Unassigned unit';
+}
+function unitById(id){ return UNITS.find(x=>x.id===id) || null; }
+function studentUnitId(student){
+  const cid = classOfStudent(student.id);
+  const cls = CLASSES.find(c=>c.id===cid);
+  if(cls && cls.org_unit_id) return cls.org_unit_id;
+  return student.org_unit_id || null;
+}
+function resolveTuition(student, periodStart, periodEnd){
+  const unitId = studentUnitId(student);
+  const r = BILLING_LOGIC.resolveTuition(
+    student.id, unitId, TERM?TERM.id:null, TERM?TERM.tuition_fee_default:null,
+    OVERRIDES, SCHEDULES, TUITION_COMPONENT, GEN_FREQUENCY, periodStart, periodEnd);
+  if(r.source==='override'){ const o = OVERRIDES.find(x=>x.id===r.override_id); r.label = `Student override — ${o?o.reason:'no reason'}`; }
+  else if(r.source==='schedule'){ r.label = `${unitName(unitId)} schedule`; }
+  else if(r.source==='legacy'){ r.label = 'Legacy term default'; }
+  else { r.label = 'Not configured'; }
+  return r;
+}
+
+// ===== Invoice generation (preview + atomic owner RPC) =====
+let GEN_ROWS = [], GEN_PERIOD = null, GEN_FREQUENCY = 'monthly', GEN_DUE_MAP = {};
+function computeGroupDueMap(rows){
+  // expectedGroupDue compatibility: this map now covers fallback-only groups too.
+  // Create an entry for EVERY household+unit group, including groups that rely
+  // on the configured or period-start fallback, so the preview matches the RPC.
+  const groupDays = {};
+  rows.forEach(r=>{
+    const key = r.parent_id + '::' + r.unit_id;
+    if(!(key in groupDays)) groupDays[key] = null;
+    if(r.due_day != null){
+      groupDays[key] = groupDays[key]==null ? r.due_day : Math.min(groupDays[key], r.due_day);
+    }
+  });
+  const map = {};
+  Object.keys(groupDays).forEach(key=>{
+    map[key] = BILLING_LOGIC.dueDateForPeriod(GEN_FREQUENCY, GEN_PERIOD, groupDays[key], CFG.dueDayDefault);
+  });
+  return map;
+}
+function openGeneratePreview(){
   if(!TERM){ alert('Belum ada term aktif. Buat di Settings dulu.'); return; }
-  const fee = Number(TERM.tuition_fee_default||0) || 2400000;
-  const byParent = {};
-  ENROLLMENTS.filter(e=>e.term_id===TERM.id && e.status==='enrolled').forEach(e=>{
-    const st = STUDENTS.find(s=>s.id===e.student_id); if(!st) return;
-    byParent[st.parent_id] = byParent[st.parent_id] || { names:[], count:0 };
-    byParent[st.parent_id].names.push(st.name); byParent[st.parent_id].count++;
-  });
-  const dueDay = CFG.dueDayDefault; let due;
-  if(dueDay){ const d=new Date(); d.setMonth(d.getMonth()+1); d.setDate(dueDay); due=d.toISOString().slice(0,10); }
-  else due = new Date(Date.now()+14*86400000).toISOString().slice(0,10);
+  GEN_FREQUENCY = el('gen_frequency').value || 'monthly';
+  const monthWrap = el('gen_month_wrap'), monthEl = el('gen_month');
+  monthWrap.style.display = GEN_FREQUENCY==='monthly' ? 'block' : 'none';
+  const month = monthEl.value || new Date().toISOString().slice(0,7);
+  GEN_PERIOD = BILLING_LOGIC.periodBoundsFor(GEN_FREQUENCY, month, TERM);
+  if(!GEN_PERIOD){ alert('Frekuensi ini belum didukung.'); return; }
+  GEN_ROWS = ENROLLMENTS.filter(e=>e.term_id===TERM.id && e.status==='enrolled').map(e=>{
+    const st = STUDENTS.find(s=>s.id===e.student_id); if(!st) return null;
+    const cls = CLASSES.find(c=>c.id===e.class_id);
+    if(cls && cls.status==='closed') return null; // closed classes never bill
+    const res = resolveTuition(st, GEN_PERIOD.start, GEN_PERIOD.end);
+    return { student_id:st.id, student_name:st.name, parent_id:st.parent_id, unit_id:res.unit_id,
+      enrollment_id:e.id, class_name: cls?cls.name:'', amount:res.amount, source:res.source, sourceLabel:res.label,
+      schedule_id:res.schedule_id, override_id:res.override_id, due_day:res.due_day, excluded:false };
+  }).filter(Boolean);
+  GEN_DUE_MAP = computeGroupDueMap(GEN_ROWS);
+  GEN_ROWS.forEach(r=>{ r.due = GEN_DUE_MAP[r.parent_id + '::' + r.unit_id]; });
+  el('gen_err').textContent='';
+  renderGeneratePreview();
+  el('genModal').classList.add('open');
+}
+function renderGeneratePreview(){
+  const box = el('gen_body');
+  const btn = el('gen_confirm');
+  if(!GEN_ROWS.length){ box.innerHTML='<div class="empty">No enrolled students this term.</div>'; btn.disabled=true; return; }
+  btn.disabled=false;
+  box.innerHTML = `<table><thead><tr><th>Include</th><th>Student</th><th>Household</th><th>Unit</th><th>Class</th><th>Source</th><th>Amount (draft)</th><th>Due</th><th>Reason if changed</th></tr></thead><tbody>${
+    GEN_ROWS.map((r,i)=>{
+      const missing = r.amount==null;
+      const warn = missing ? '<span class="stamp overdue">Missing</span>' : (r.source==='legacy'?'<span class="stamp pending">Legacy</span>':'');
+      const amt = missing ? '' : formatAmountInput(r.amount);
+      return `<tr><td><input type="checkbox" class="gen-include" data-i="${i}" checked></td>
+        <td><strong>${esc(r.student_name)}</strong>${warn?' '+warn:''}</td>
+        <td class="sub">${esc(parentName(r.parent_id))}</td>
+        <td class="sub">${esc(unitName(r.unit_id))}</td>
+        <td class="sub">${esc(r.class_name)}</td>
+        <td class="sub">${esc(r.sourceLabel)}</td>
+        <td><input class="gen-amt" data-i="${i}" inputmode="numeric" value="${amt}" placeholder="—" style="width:120px;padding:6px 8px;border:1px solid var(--hairline);border-radius:var(--radius)"></td>
+        <td class="sub">${esc(r.due)}</td>
+        <td><input class="gen-reason" data-i="${i}" placeholder="optional unless amount changed" style="width:140px;padding:6px 8px;border:1px solid var(--hairline);border-radius:var(--radius)"></td></tr>`;
+    }).join('')
+  }</tbody></table><p class="field-note" style="margin-top:10px">Billing period: ${esc(GEN_PERIOD.start)} → ${esc(GEN_PERIOD.end)}. Uncheck a row to exclude it. Any adjusted amount needs a reason.</p>`;
+}
+async function confirmGenerate(){
+  const err = el('gen_err'); err.textContent='';
+  const btn = el('gen_confirm');
   const rows = [];
-  Object.keys(byParent).forEach(pid=>{
-    if(INVOICES.some(i=>i.parent_id===pid && i.term_id===TERM.id)) return;
-    const amt = fee * byParent[pid].count;
-    rows.push({ parent_id:pid, term_id:TERM.id, amount:amt, paid_amount:0,
-      items:[{label:'Uang Sekolah', amount:amt}], payments:[], due_date:due, status:'unpaid', note:byParent[pid].names.join(', ') });
+  let missingCount = 0, changedNoReason = 0;
+  GEN_ROWS.forEach((r,i)=>{
+    const inc = document.querySelector(`.gen-include[data-i="${i}"]`);
+    if(!inc || !inc.checked) return;
+    const amtEl = document.querySelector(`.gen-amt[data-i="${i}"]`);
+    const reasonEl = document.querySelector(`.gen-reason[data-i="${i}"]`);
+    let amount = r.amount;
+    if(amtEl){ const parsed = parseLocalizedNumber(amtEl.value); if(parsed != null) amount = parsed; }
+    if(amount == null || amount <= 0){ missingCount++; return; }
+    const reason = reasonEl ? reasonEl.value.trim() : '';
+    if(amount !== r.amount && !reason){ changedNoReason++; return; }
+    rows.push({ student_id: r.student_id, enrollment_id: r.enrollment_id, amount, reason: reason || null });
   });
-  if(!rows.length){ alert('Tidak ada invoice baru — semua keluarga terdaftar sudah punya invoice term ini.'); return; }
-  if(!confirm(`Buat ${rows.length} invoice Uang Sekolah @ ${rp(fee)} per siswa, jatuh tempo ${due}?`)) return;
-  const { error } = await sb.from('invoices').insert(rows);
-  if(error){ alert('Gagal: '+error.message); return; }
-  logAudit('invoice.bulk', rows.length+' uang sekolah');
+  if(changedNoReason){ err.textContent = `${changedNoReason} student(s) have an adjusted amount but no reason. Add a reason for every changed amount.`; return; }
+  if(!rows.length){ err.textContent = 'No students selected. Check the rows you want to bill.'; return; }
+  if(missingCount){ err.textContent = `${missingCount} selected student(s) have no tuition configured and no amount entered. Exclude them or enter an amount.`; return; }
+
+  // Recompute the due map from the rows ACTUALLY checked (not the full preview),
+  // so the comparison reflects exactly what will be submitted.
+  const checkedDueMap = computeGroupDueMap(rows);
+
+  btn.disabled = true;
+  const { data, error } = await sb.rpc('owner_generate_invoices', {
+    p_term_id: TERM.id,
+    p_period_start: GEN_PERIOD.start,
+    p_period_end: GEN_PERIOD.end,
+    p_fee_component: TUITION_COMPONENT,
+    p_rows: rows,
+    p_frequency: GEN_FREQUENCY,
+    p_due_day_fallback: CFG.dueDayDefault || null
+  });
+  btn.disabled = false;
+  if(error){
+    err.textContent = isMissingFunctionError(error.message)
+      ? 'This action requires the invoice-generation database migration (011+), which is still a draft and has not been deployed yet.'
+      : 'Generation was not completed: ' + error.message;
+    return;
+  }
+  const createdList = data?.created_list || [];
+  // Verify the committed due date matches the submitted rule; any mismatch is an error.
+  for(const g of createdList){
+    const previewDue = checkedDueMap[g.parent_id + '::' + g.unit_id];
+    if(previewDue && g.due_date !== previewDue){
+      btn.disabled = false;
+      err.textContent = `Due date mismatch for a generated invoice: preview ${previewDue}, committed ${g.due_date}. The invoice was created; review it and reconcile.`;
+      return;
+    }
+  }
+  const invoices = data?.created_invoices || 0, students = data?.created_students || 0, skipped = data?.skipped || 0;
+  const skippedList = data?.skipped_list || [];
+  closeModal('genModal');
   await loadAll();
-  alert(`${rows.length} invoice dibuat.`);
+  const skipMsg = skippedList.length ? '\n\nSkipped:\n' + skippedList.slice(0,10).map(s=>`- ${s.student_id||''} (${s.reason||'skipped'})`).join('\n') : '';
+  alert(`Generated ${invoices} invoice(s) for ${students} student(s), skipped ${skipped}.` + skipMsg);
 }
 
 // Build a custom itemized invoice
 function openBuildInvoice(){
   el('bi_err').textContent='';
+  const activeStudents = STUDENTS.slice().sort((a,b)=>a.name.localeCompare(b.name));
+  el('bi_student').innerHTML = activeStudents.map(s=>`<option value="${s.id}">${esc(s.name)} · ${esc(unitName(studentUnitId(s)))}</option>`).join('') || '<option value="">Belum ada siswa</option>';
   el('bi_parent').innerHTML = PARENTS.slice().sort((a,b)=>a.name.localeCompare(b.name)).map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join('') || '<option value="">Belum ada keluarga</option>';
-  el('bi_items').innerHTML = feeComponents().map(f=>`<div style="display:flex;align-items:center;gap:10px;margin-top:8px"><label style="flex:1;margin:0;text-transform:none;font-size:13px;color:var(--ink)">${esc(f)}</label><input data-fee="${esc(f)}" type="number" placeholder="0" style="width:150px;padding:8px 10px;border:1px solid var(--hairline);border-radius:var(--radius)"></div>`).join('');
+  syncInvoiceStudent();
+  el('bi_items').innerHTML = feeComponents().map(f=>`<div style="display:flex;align-items:center;gap:10px;margin-top:8px"><label style="flex:1;margin:0;text-transform:none;font-size:13px;color:var(--ink)">${esc(f)}</label><input data-fee="${esc(f)}" type="text" inputmode="numeric" autocomplete="off" placeholder="0" style="width:150px;padding:8px 10px;border:1px solid var(--hairline);border-radius:var(--radius)"></div>`).join('');
   const dueDay = CFG.dueDayDefault; let due;
   if(dueDay){ const d=new Date(); d.setMonth(d.getMonth()+1); d.setDate(dueDay); due=d.toISOString().slice(0,10); }
   else due = new Date(Date.now()+14*86400000).toISOString().slice(0,10);
   el('bi_due').value = due;
   el('buildModal').classList.add('open');
 }
+function syncInvoiceStudent(){
+  const student = STUDENTS.find(s=>s.id===el('bi_student').value);
+  if(student && student.parent_id) el('bi_parent').value = student.parent_id;
+}
 async function saveInvoice(){
   const err = el('bi_err'); err.textContent='';
+  const sid = el('bi_student').value;
+  const student = STUDENTS.find(s=>s.id===sid);
+  if(!student){ err.textContent='Pilih siswa.'; return; }
   const pid = el('bi_parent').value;
   if(!pid){ err.textContent='Pilih keluarga.'; return; }
   const items = [];
-  document.querySelectorAll('#bi_items [data-fee]').forEach(inp=>{ const v=parseInt(inp.value)||0; if(v>0) items.push({ label:inp.dataset.fee, amount:v }); });
+  document.querySelectorAll('#bi_items [data-fee]').forEach(inp=>{ const v=parseLocalizedNumber(inp.value); if(v!=null && v>0) items.push({ label:inp.dataset.fee, amount:v }); });
   if(!items.length){ err.textContent='Isi minimal satu komponen biaya.'; return; }
   const total = items.reduce((s,x)=>s+x.amount,0);
   const p = PARENTS.find(x=>x.id===pid) || {};
   const { error } = await sb.from('invoices').insert({
     parent_id:pid, term_id:TERM?TERM.id:null, amount:total, paid_amount:0,
-    items, payments:[], due_date:el('bi_due').value||null, status:'unpaid', note:p.name||''
+    items, payments:[], due_date:el('bi_due').value||null, status:'unpaid',
+    note:student.name||p.name||'', org_unit_id:studentUnitId(student)
   });
   if(error){ err.textContent='Gagal: '+error.message; return; }
   logAudit('invoice.create', (p.name||'')+' '+rp(total));
@@ -1482,25 +2110,24 @@ function renderManage(){
       <div class="d-row" style="border:none"><span class="k">Terbayar</span><span>${rp(paid)}</span></div>
       <div class="d-row" style="border:none;font-weight:600;color:${remain>0?'var(--rust)':'var(--green)'}"><span>Sisa</span><span>${rp(remain)}</span></div>
     </div>
-    <div class="d-sec"><h3>Tambah komponen</h3>
+    ${i.status!=='void' ? `<div class="d-sec"><h3>Tambah komponen</h3>
       <div style="display:flex;gap:8px">
         <select id="mi_fee" class="inline" style="flex:1;max-width:none">${feeOpts}</select>
-        <input id="mi_amt" type="number" placeholder="Jumlah" style="width:130px;padding:8px 10px;border:1px solid var(--hairline);border-radius:var(--radius)">
+        <input id="mi_amt" type="text" inputmode="numeric" autocomplete="off" placeholder="Jumlah" style="width:130px;padding:8px 10px;border:1px solid var(--hairline);border-radius:var(--radius)">
         <button class="btn btn-ghost" onclick="addInvoiceItem()">Tambah</button>
       </div>
     </div>
     <div class="d-sec"><h3>Catat pembayaran (cicilan)</h3>
       <div style="display:flex;gap:8px">
-        <input id="mi_pay" type="number" placeholder="Jumlah diterima" style="flex:1;padding:8px 10px;border:1px solid var(--hairline);border-radius:var(--radius)">
+        <input id="mi_pay" type="text" inputmode="numeric" autocomplete="off" placeholder="Jumlah diterima" style="flex:1;padding:8px 10px;border:1px solid var(--hairline);border-radius:var(--radius)">
         <button class="btn btn-primary" onclick="recordPayment()">Catat</button>
-      </div>
-      ${pays.length ? '<div style="margin-top:10px">'+pays.map(p=>`<div class="d-row"><span class="k">${esc(p.date)}</span><span>${rp(p.amount)}</span></div>`).join('')+'</div>' : ''}
-    </div>
-    ${i.status!=='void' ? `<button class="btn btn-ghost" onclick="voidInvoice()">Batalkan invoice</button>` : '<div class="d-empty">Invoice dibatalkan.</div>'}`;
+      </div>` : ''}
+      ${pays.length ? '<div style="margin-top:10px">'+pays.map((p)=>{ const amt=Number(p.amount||0); const rev=p.reversal?true:false; return `<div class="d-row"><span class="k">${esc(p.date||'')}${rev?' (reversal)':''}</span><span>${rp(p.amount)}${(CURRENT_ROLE==='owner'&&!rev&&amt>0&&p.id)?` <button class="btn btn-ghost" onclick="reversePayment('${i.id}','${esc(p.id)}')">Reverse</button>`:''}</span></div>`; }).join('')+'</div>' : ''}
+    ${i.status!=='void' ? `</div>${CURRENT_ROLE==='owner'?`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><button class="btn btn-ghost" onclick="voidInvoice()">Void invoice (reason required)</button>${(i.status==='draft'||(i.status==='unpaid'&&Number(i.paid_amount||0)<=0&&(!Array.isArray(i.payments)||!i.payments.length)))?`<button class="btn btn-ghost" onclick="deleteDraftInvoice('${i.id}')">Delete draft invoice</button>`:''}</div>`:''}` : '<div class="d-empty">Invoice dibatalkan.</div>'}`;
 }
 async function addInvoiceItem(){
   const i = INVOICES.find(x=>x.id===MANAGE_ID); if(!i) return;
-  const amt = parseInt(el('mi_amt').value)||0;
+  const amt = parseLocalizedNumber(el('mi_amt').value)||0;
   if(amt<=0){ alert('Isi jumlah.'); return; }
   const items = (Array.isArray(i.items)?i.items:[]).concat([{ label:el('mi_fee').value, amount:amt }]);
   const total = items.reduce((s,x)=>s+x.amount,0);
@@ -1511,24 +2138,20 @@ async function addInvoiceItem(){
 }
 async function recordPayment(){
   const i = INVOICES.find(x=>x.id===MANAGE_ID); if(!i) return;
-  const amt = parseInt(el('mi_pay').value)||0;
+  const amt = parseLocalizedNumber(el('mi_pay').value)||0;
   if(amt<=0){ alert('Isi jumlah pembayaran.'); return; }
-  const paid = Number(i.paid_amount||0)+amt;
-  const pays = (Array.isArray(i.payments)?i.payments:[]).concat([{ date:new Date().toISOString().slice(0,10), amount:amt }]);
-  const total = Number(i.amount||0);
-  const status = paid>=total ? 'paid' : (paid>0?'partial':'unpaid');
-  const { error } = await sb.from('invoices').update({ paid_amount:paid, payments:pays, status, paid_at: status==='paid'?new Date().toISOString():null }).eq('id',MANAGE_ID);
-  if(error){ alert('Gagal: '+error.message); return; }
-  logAudit('invoice.payment', (i.parents?.name||'')+' '+rp(amt));
+  const paymentRpc = CURRENT_ROLE==='admin' ? 'finance_record_payment' : 'owner_record_payment';
+  const { error } = await sb.rpc(paymentRpc, {
+    p_invoice_id: MANAGE_ID, p_amount: amt, p_method: null, p_reference: null
+  });
+  if(error){
+    alert(isMissingFunctionError(error.message)
+      ? 'This action requires the payment database migration (007+), which is still a draft and has not been deployed yet.'
+      : 'Payment was not recorded: ' + error.message);
+    return;
+  }
   await loadAll(); renderManage();
 }
-async function voidInvoice(){
-  if(!confirm('Batalkan invoice ini?')) return;
-  const { error } = await sb.from('invoices').update({ status:'void' }).eq('id',MANAGE_ID);
-  if(error){ alert('Gagal: '+error.message); return; }
-  await loadAll(); renderManage();
-}
-
 function waReminder(id){
   const i = INVOICES.find(x=>x.id===id); if(!i) return;
   const phone = waPhone(i.parents?.phone);
@@ -1539,36 +2162,6 @@ function waReminder(id){
     due:i.due_date||'-', term:TERM?TERM.label:'', bank:bankLine(), biz:bizName()
   });
   window.open('https://wa.me/'+phone+'?text='+encodeURIComponent(msg), '_blank');
-}
-
-function pdfInvoice(id){
-  const i = INVOICES.find(x=>x.id===id); if(!i) return;
-  const w = window.open('', '_blank');
-  const paid = Number(i.paid_amount||0), total = Number(i.amount||0), remain = Math.max(0,total-paid);
-  const isPaid = remain<=0;
-  const items = Array.isArray(i.items)&&i.items.length ? i.items : [{label:i.note||'Biaya', amount:total}];
-  const itemRows = items.map(x=>`<tr><td>${esc(x.label)}</td><td style="text-align:right">${rp(x.amount)}</td></tr>`).join('');
-  w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Invoice ${esc(i.parents?.name||'')}</title>
-  <style>body{font-family:Georgia,serif;color:#1B2A4A;max-width:640px;margin:40px auto;padding:0 24px}
-  .head{display:flex;justify-content:space-between;border-bottom:2px solid #1B2A4A;padding-bottom:16px;margin-bottom:24px}
-  h1{font-size:24px;margin:0} .sub{color:#6B7280;font-size:13px}
-  .stamp{display:inline-block;border:2px dashed ${isPaid?'#2F5D50':'#B5502D'};color:${isPaid?'#2F5D50':'#B5502D'};padding:4px 14px;border-radius:20px;font-size:13px;font-weight:bold;transform:rotate(-4deg);text-transform:uppercase}
-  table{width:100%;border-collapse:collapse;margin:20px 0} td,th{text-align:left;padding:9px 0;border-bottom:1px solid #d9d4c7;font-size:14px}
-  .tot td{font-weight:bold;font-size:16px;border-top:2px solid #1B2A4A} .foot{color:#6B7280;font-size:12px;margin-top:40px;border-top:1px solid #d9d4c7;padding-top:12px}</style></head>
-  <body>
-  <div class="head"><div><h1>${esc(bizName())}</h1><div class="sub">Invoice · ${esc(TERM?TERM.label:'')}</div></div><div class="stamp">${isPaid?'Lunas':'Belum Lunas'}</div></div>
-  <div style="margin-bottom:8px"><strong>Keluarga:</strong> ${esc(i.parents?.name||'')} &nbsp;·&nbsp; <strong>Jatuh tempo:</strong> ${esc(i.due_date||'-')}</div>
-  <table>
-    <tr><th>Komponen</th><th style="text-align:right">Jumlah</th></tr>
-    ${itemRows}
-    <tr class="tot"><td>Total</td><td style="text-align:right">${rp(total)}</td></tr>
-    <tr><td>Terbayar</td><td style="text-align:right">${rp(paid)}</td></tr>
-    <tr><td><strong>Sisa</strong></td><td style="text-align:right"><strong>${rp(remain)}</strong></td></tr>
-  </table>
-  <div class="foot">Mohon diselesaikan sebelum jatuh tempo.${(BANK.name||BANK.account)?' Pembayaran: '+esc(BANK.name)+(BANK.account?' '+esc(BANK.account):'')+'.':''} — ${esc(bizName())}</div>
-  <script>window.onload=function(){window.print()}<\/script>
-  </body></html>`);
-  w.document.close();
 }
 
 // ===== Grades & report cards =====
@@ -1706,6 +2299,7 @@ async function renderIncidentsTab(){
       if(i.status==='open') next=`<button class="btn btn-ghost" onclick="setIncident('${i.id}','follow-up')">Follow-up</button> <button class="btn btn-primary" onclick="setIncident('${i.id}','resolved')">Resolve</button>`;
       else if(i.status==='follow-up') next=`<button class="btn btn-primary" onclick="setIncident('${i.id}','resolved')">Resolve</button>`;
       else next=`<button class="btn btn-ghost" onclick="setIncident('${i.id}','open')">Reopen</button>`;
+      next += ` <button class="btn btn-ghost" onclick="deleteIncident('${i.id}')">Delete</button>`;
       return `<tr><td class="sub" style="white-space:nowrap">${new Date(i.created_at).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}</td><td><strong>${esc(i.students?.name||'—')}</strong></td><td>${i.category?`<span class="incident-cat">${esc(i.category)}</span>`:'—'}</td><td>${esc(i.description)}</td><td>${stampFor(i.status)}</td><td style="white-space:nowrap">${next}</td></tr>`;
     }).join('')
   }</tbody></table>`;
@@ -1730,12 +2324,942 @@ async function saveIncident(){
   renderIncidentsTab();
 }
 async function setIncident(id, status){
+  if(status==='resolved'){
+    openRemoval({ kind:'resolve_incident', id, title:'Resolve incident',
+      description:'Mark this incident resolved?', consequence:'The incident is kept in the log.',
+      confirmLabel:'Resolve incident' });
+    return;
+  }
+  // reopen/follow-up are non-destructive status updates; recorded by history
   const patch = { status };
-  patch.resolved_at = status==='resolved' ? new Date().toISOString() : null;
+  patch.resolved_at = null;
   const { error } = await sb.from('incidents').update(patch).eq('id', id);
   if(error){ alert('Could not update: '+error.message); return; }
   await loadAll();
   renderIncidentsTab();
+}
+
+// ===== Controlled removal (archive / void / delete with reason) =====
+function newUuid(){
+  try{ if(crypto && crypto.randomUUID) return crypto.randomUUID(); }catch(e){}
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{const r=Math.random()*16|0;const v=c==='x'?r:(r&0x3|0x8);return v.toString(16);});
+}
+let REMOVAL = null;
+function openRemoval(cfg){
+  REMOVAL = cfg;
+  el('rm_title').textContent = cfg.title || 'Confirm';
+  el('rm_desc').textContent = cfg.description || '';
+  el('rm_consequence').textContent = cfg.consequence || '';
+  el('rm_confirm').textContent = cfg.confirmLabel || 'Confirm';
+  el('rm_reason').value = '';
+  el('rm_err').textContent = '';
+  el('removalModal').classList.add('open');
+}
+function isMissingFunctionError(msg){
+  return /could not find the function|function .* does not exist|does not exist/i.test(msg||'');
+}
+async function confirmRemoval(){
+  const err = el('rm_err'); err.textContent='';
+  const reason = el('rm_reason').value.trim();
+  if(!reason){ err.textContent='A reason is required.'; return; }
+  if(!REMOVAL){ return; }
+  const btn = el('rm_confirm'); btn.disabled = true;
+  const correlationId = newUuid();
+  let error = null;
+  try{
+    const kind = REMOVAL.kind, id = REMOVAL.id, extra = REMOVAL.extra || {};
+    const actions = {
+      archive_student:     { fn:'owner_archive_student',       args:{ p_student_id:id } },
+      restore_student:     { fn:'owner_restore_student',       args:{ p_student_id:id } },
+      delete_student:      { fn:'owner_delete_student',        args:{ p_student_id:id } },
+      close_class:         { fn:'owner_close_class',           args:{ p_class_id:id } },
+      delete_class:        { fn:'owner_delete_class',          args:{ p_class_id:id } },
+      withdraw_enrollment: { fn:'owner_withdraw_enrollment',   args:{ p_enrollment_id:id } },
+      delete_attendance:   { fn:'owner_delete_attendance',     args:{ p_attendance_id:id } },
+      delete_grade:        { fn:'owner_delete_grade',          args:{ p_grade_id:id } },
+      resolve_incident:    { fn:'owner_resolve_incident',      args:{ p_incident_id:id } },
+      delete_incident:     { fn:'owner_delete_incident',       args:{ p_incident_id:id } },
+      deactivate_term:     { fn:'owner_deactivate_term',       args:{ p_term_id:id } },
+      archive_parent:      { fn:'owner_archive_parent',        args:{ p_parent_id:id } },
+      delete_parent:       { fn:'owner_delete_parent',         args:{ p_parent_id:id } },
+      reverse_payment:     { fn:'owner_reverse_payment',       args:{ p_invoice_id:id, p_payment_id:extra.payment_id } },
+      void_invoice:        { fn:'owner_void_invoice',          args:{ p_invoice_id:id } },
+      delete_draft_invoice:{ fn:'owner_delete_invoice_draft', args:{ p_invoice_id:id } },
+      deactivate_unit:     { fn:'owner_deactivate_unit',       args:{ p_unit_id:id } },
+      deactivate_schedule: { fn:'owner_deactivate_schedule',   args:{ p_schedule_id:id } },
+      deactivate_override: { fn:'owner_deactivate_override',   args:{ p_override_id:id } },
+      void_expense:        { fn:'owner_void_expense',          args:{ p_expense_id:id } },
+      delete_draft_expense:{ fn:'owner_delete_draft_expense', args:{ p_expense_id:id } }
+    };
+    const a = actions[kind];
+    if(a){
+      const args = Object.assign({}, a.args, { p_reason:reason, p_correlation_id:correlationId });
+      ({ error } = await sb.rpc(a.fn, args));
+    } else {
+      error = { message:'Unknown removal action.' };
+    }
+  }catch(e){
+    error = { message: e.message || String(e) };
+  } finally {
+    btn.disabled = false;
+  }
+  if(error){
+    const m = error.message || '';
+    err.textContent = isMissingFunctionError(m)
+      ? 'This action requires the accountability/removal database migration (007+), which is still a draft and has not been deployed yet. Ask your builder to run it after Codex QC.'
+      : 'Action was not completed: ' + m;
+    return;
+  }
+  closeModal('removalModal');
+  REMOVAL = null;
+  await loadAll();
+  if(ACTIVE==='history') renderHistory();
+}
+function archiveStudent(id){
+  const s = STUDENTS.find(x=>x.id===id); if(!s) return;
+  openRemoval({ kind:'archive_student', id, title:'Archive student',
+    description:`Archive ${s.name}? They will disappear from the default active list but remain searchable, and all history is kept.`,
+    consequence:'Archiving is the right action when a student has enrollment, attendance, grades, incidents, invoices, or payments.',
+    confirmLabel:'Archive student' });
+}
+async function deleteStudent(id){
+  const s = STUDENTS.find(x=>x.id===id); if(!s) return;
+  openRemoval({ kind:'delete_student', id, title:'Delete student',
+    description:`Permanently delete ${s.name}? This only succeeds if they have no enrollment, attendance, grades, incidents, or invoice lines.`,
+    consequence:'If any dependent records exist the action is blocked and you should archive instead.',
+    confirmLabel:'Delete student' });
+}
+async function deleteClass(id){
+  const c = CLASSES.find(x=>x.id===id); if(!c) return;
+  openRemoval({ kind:'delete_class', id, title:'Delete class',
+    description:`Permanently delete the class "${c.name}"? This only succeeds if it has no enrollments, attendance, or grades.`,
+    consequence:'If it has dependents, the action is blocked and you should close/archive the class instead.',
+    confirmLabel:'Delete class' });
+}
+function voidInvoice(){
+  const i = INVOICES.find(x=>x.id===MANAGE_ID); if(!i) return;
+  openRemoval({ kind:'void_invoice', id:i.id, title:'Void invoice',
+    description:`Void this invoice for ${i.parents?.name||'this family'}? The invoice number, lines, payments, actor, date, and reason are all kept.`,
+    consequence:'A voided invoice no longer counts as collectible revenue.',
+    confirmLabel:'Void invoice' });
+}
+function deleteDraftInvoice(id){
+  const i = INVOICES.find(x=>x.id===id); if(!i) return;
+  openRemoval({ kind:'delete_draft_invoice', id, title:'Delete draft invoice',
+    description:`Delete this draft/unpaid invoice for ${i.parents?.name||'this family'}?`,
+    consequence:'A full snapshot is saved to Deleted Data. Paid or partially-paid invoices cannot be deleted — void them instead.',
+    confirmLabel:'Delete draft invoice' });
+}
+function restoreStudent(id){
+  const s = ALL_STUDENTS.find(x=>x.id===id); if(!s) return;
+  openRemoval({ kind:'restore_student', id, title:'Restore student',
+    description:`Restore ${s.name} to active?`,
+    consequence:'The student reappears in the default active list.',
+    confirmLabel:'Restore student' });
+}
+function closeClass(id){
+  const c = CLASSES.find(x=>x.id===id); if(!c) return;
+  openRemoval({ kind:'close_class', id, title:'Close class',
+    description:`Close/archive the class "${c.name}"?`,
+    consequence:'The class and its history are kept, but it is no longer an active class.',
+    confirmLabel:'Close class' });
+}
+function deactivateTerm(id){
+  const t = ALLTERMS.find(x=>x.id===id); if(!t) return;
+  openRemoval({ kind:'deactivate_term', id, title:'Deactivate term',
+    description:`Deactivate the term "${t.label}"?`,
+    consequence:'The term is kept but no longer the active term.',
+    confirmLabel:'Deactivate term' });
+}
+function deactivateUnit(id){
+  const u = unitById(id); if(!u) return;
+  openRemoval({ kind:'deactivate_unit', id, title:'Deactivate unit',
+    description:`Deactivate the unit "${u.name}"?`,
+    consequence:'The unit and its history are kept, but it is no longer an active choice.',
+    confirmLabel:'Deactivate unit' });
+}
+function deactivateSchedule(id){
+  openRemoval({ kind:'deactivate_schedule', id, title:'Deactivate schedule',
+    description:'Deactivate this tuition schedule?',
+    consequence:'The legacy term default or another schedule may then apply.',
+    confirmLabel:'Deactivate schedule' });
+}
+function deactivateOverride(id){
+  openRemoval({ kind:'deactivate_override', id, title:'Deactivate override',
+    description:'Deactivate this student tuition override?',
+    consequence:'The standard schedule will then apply.',
+    confirmLabel:'Deactivate override' });
+}
+function deleteIncident(id){
+  openRemoval({ kind:'delete_incident', id, title:'Delete incident',
+    description:'Delete this incident?',
+    consequence:'A full snapshot is saved to Deleted Data.',
+    confirmLabel:'Delete incident' });
+}
+function reversePayment(invoiceId, paymentId){
+  openRemoval({ kind:'reverse_payment', id:invoiceId, extra:{ payment_id: paymentId }, title:'Reverse payment',
+    description:'Reverse this specific payment?',
+    consequence:'The original payment is kept and a reversal entry referencing it is appended.',
+    confirmLabel:'Reverse payment' });
+}
+
+// ===== Readable History & Deleted Data (Jakarta time, actor, filters) =====
+const JAKARTA_TZ = 'Asia/Jakarta';
+function historyTime(value){
+  if(!value) return '—';
+  const d = new Date(value); if(Number.isNaN(d.getTime())) return '—';
+  try{ return new Intl.DateTimeFormat('id-ID',{timeZone:JAKARTA_TZ,day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit',hour12:false}).format(d); }
+  catch(e){ return d.toLocaleString('en-GB',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}); }
+}
+function historyActor(item){
+  if(item.actor_name) return item.actor_name;
+  if(item.actor_email) return item.actor_email;
+  if(item.source==='system' || (!item.actor_id && !item.actor_email)){
+    if(item.table_name==='admin_users' && item.action==='INSERT') return 'System — teacher signup';
+    return 'System';
+  }
+  return 'Unknown';
+}
+function readableValue(v, field){
+  if(v == null || v === '') return '—';
+  if(typeof v === 'object') return JSON.stringify(v);
+  if(/amount|fee|tuition|paid|total|balance|price/i.test(field||'')) return formatCurrencyIDR(v);
+  return String(v);
+}
+function historySummary(item){
+  const actor = historyActor(item);
+  const label = item.record_label || item.record_id || '';
+  const what = item.table_name || 'record';
+  const named = label ? ` "${label}"` : '';
+  if(item.action==='INSERT'){
+    if(item.table_name==='admin_users' && (!item.actor_id && !item.actor_email)) return `System created pending teacher${label?' '+label:''}`;
+    return `${actor} created ${what}${named}`;
+  }
+  if(item.action==='DELETE'){
+    return `${actor} deleted ${what}${named}${item.reason?' — '+item.reason:''}`;
+  }
+  const fields = Object.keys(item.changed_fields||{});
+  if(fields.length){
+    if(fields.includes('status') && item.after_data && item.after_data.status==='inactive') return `${actor} archived ${what}${named}${item.reason?' — '+item.reason:''}`;
+    if(fields.includes('status') && item.after_data && item.after_data.status==='void') return `${actor} voided ${what}${named}${item.reason?' — '+item.reason:''}`;
+    if(fields.length===1 && item.changed_fields[fields[0]]){
+      const ch = item.changed_fields[fields[0]];
+      return `${actor} changed ${fields[0]} from ${readableValue(ch.before, fields[0])} to ${readableValue(ch.after, fields[0])}${named}`;
+    }
+    return `${actor} changed ${fields.join(', ')}${named}`;
+  }
+  return `${actor} updated ${what}${named}`;
+}
+async function renderHistory(){
+  const historyBox=el('historyTable'), deletedBox=el('deletedDataTable');
+  historyBox.innerHTML='<div class="empty">Loading history…</div>';
+  deletedBox.innerHTML='<div class="empty">Loading deleted data…</div>';
+  setHistoryStatus('Loading the latest accountability records…');
+  const [historyResult, deletedResult] = await Promise.all([
+    sb.from('change_history').select('*').order('created_at',{ascending:false}).limit(500),
+    sb.from('deleted_data').select('*').order('deleted_at',{ascending:false}).limit(500)
+  ]);
+  if(historyResult.error || deletedResult.error){
+    const message=(historyResult.error||deletedResult.error).message||'Unknown error';
+    historyBox.innerHTML='<div class="empty">History is not ready yet.</div>';
+    deletedBox.innerHTML='<div class="empty">Deleted data is not ready yet.</div>';
+    setHistoryStatus('Run the change-history database migration, then press Refresh. '+message,true);
+    return;
+  }
+  HISTORY=historyResult.data||[];
+  DELETED_DATA=deletedResult.data||[];
+  populateHistoryFilters();
+  renderHistoryRows();
+  renderDeletedRows();
+}
+function populateHistoryFilters(){
+  const tables = [...new Set(HISTORY.map(h=>h.table_name).filter(Boolean))].sort();
+  el('hf_table').innerHTML = '<option value="">All</option>' + tables.map(t=>`<option value="${esc(t)}">${esc(t)}</option>`).join('');
+}
+function filteredHistory(){
+  const actor = (el('hf_actor').value||'').trim().toLowerCase();
+  const action = el('hf_action').value;
+  const table = el('hf_table').value;
+  const rec = (el('hf_record').value||'').trim().toLowerCase();
+  const from = el('hf_from').value, to = el('hf_to').value;
+  return HISTORY.filter(h=>{
+    if(actor && !((h.actor_name||'').toLowerCase().includes(actor) || (h.actor_email||'').toLowerCase().includes(actor))) return false;
+    if(action && h.action!==action) return false;
+    if(table && h.table_name!==table) return false;
+    if(rec && !((h.record_label||'').toLowerCase().includes(rec) || (h.record_id||'').toLowerCase().includes(rec))) return false;
+    const d = h.created_at ? BILLING_LOGIC.jakartaDatePart(h.created_at) : '';
+    if(from && d && d<from) return false;
+    if(to && d && d>to) return false;
+    return true;
+  });
+}
+function applyHistoryFilters(){ renderHistoryRows(); }
+function renderHistoryRows(){
+  const historyBox = el('historyTable');
+  const rows = filteredHistory();
+  historyBox.innerHTML = rows.length ? `<table><thead><tr><th>When (Jakarta)</th><th>Who</th><th>Action</th><th>Record</th><th>Summary</th><th></th></tr></thead><tbody>${rows.map(item=>`<tr><td class="sub" style="white-space:nowrap">${esc(historyTime(item.created_at))}</td><td class="sub">${esc(historyActor(item))}</td><td>${esc(item.action||'CHANGE')} ${esc(item.table_name||'')}</td><td class="sub">${esc(item.record_label||item.record_id||'—')}</td><td class="sub">${esc(historySummary(item))}</td><td><button class="btn btn-ghost" onclick="openHistoryDetail('change','${item.id}')">Details</button></td></tr>`).join('')}</tbody></table>` : '<div class="empty">No matching history. Adjust the filters, or make a change first.</div>';
+}
+function renderDeletedRows(){
+  const deletedBox = el('deletedDataTable');
+  deletedBox.innerHTML = DELETED_DATA.length ? `<table><thead><tr><th>When (Jakarta)</th><th>Who</th><th>Entity</th><th>Record</th><th>Reason</th><th>Transaction / correlation</th><th></th></tr></thead><tbody>${DELETED_DATA.map(item=>`<tr><td class="sub" style="white-space:nowrap">${esc(historyTime(item.deleted_at))}</td><td class="sub">${esc(item.deleted_by_name||item.deleted_by_email||'Unknown')}</td><td>${esc(item.source_table||'')}</td><td class="sub">${esc(item.record_label||item.source_record_id||'—')}</td><td class="sub">${esc(item.reason||'—')}</td><td class="sub">${esc(item.transaction_id||'—')}${item.correlation_id?' / '+esc(item.correlation_id):''}</td><td><button class="btn btn-ghost" onclick="openHistoryDetail('deleted','${item.id}')">Details</button></td></tr>`).join('')}</tbody></table>` : '<div class="empty">No deleted records have been archived since the history migration was installed. Restoration is not yet available.</div>';
+  setHistoryStatus(`Showing ${filteredHistory().length} changes and ${DELETED_DATA.length} deleted records.`);
+}
+
+// ===== School units & branding =====
+let EDIT_UNIT_ID = null;
+function unitLogoUrl(unit){
+  if(unit && unit.logo_path){
+    return SUPABASE_URL + '/storage/v1/object/public/logos/' + encodeURIComponent(unit.logo_path);
+  }
+  return null;
+}
+function unitOptions(selected, includeUnassigned){
+  let opts = includeUnassigned ? '<option value="">— Unassigned —</option>' : '<option value="">— choose unit —</option>';
+  opts += UNITS.map(u=>`<option value="${u.id}" ${u.id===selected?'selected':''}>${esc(u.name)}</option>`).join('');
+  return opts;
+}
+function renderUnits(){
+  const box = el('unitsTable');
+  if(!UNITS.length){ box.innerHTML='<div class="empty">No units yet. Add the recommended Santa Aurelia programs or create your own.</div>'; renderUnassigned(); return; }
+  const sorted = [...UNITS].sort((a,b)=>(a.sort_order-b.sort_order)||(a.name||'').localeCompare(b.name||''));
+  box.innerHTML = `<table><thead><tr><th>Unit</th><th>Code</th><th>Type</th><th>Status</th><th>Logo</th><th>Actions</th></tr></thead><tbody>${
+    sorted.map(u=>{
+      const logo = unitLogoUrl(u) ? `<img src="${esc(unitLogoUrl(u))}" alt="${esc(u.name)} logo" loading="lazy" style="width:44px;height:44px;object-fit:contain;border:1px solid var(--hairline);border-radius:var(--radius);background:#fff">` : '<span class="sub">—</span>';
+      const status = u.status==='active' ? '<span class="stamp paid">Active</span>' : '<span class="stamp pending">Inactive</span>';
+      const toggle = CURRENT_ROLE==='owner' ? (u.status==='active' ? `<button class="btn btn-ghost" onclick="setUnitStatus('${u.id}','inactive')">Deactivate</button>` : `<button class="btn btn-ghost" onclick="setUnitStatus('${u.id}','active')">Activate</button>`) : '';
+      return `<tr><td><strong>${esc(u.name)}</strong></td><td class="sub">${esc(u.code)}</td><td class="sub">${esc(u.type||'—')}</td><td>${status}</td><td>${logo}</td><td style="white-space:nowrap"><button class="btn btn-ghost" onclick="openEditUnit('${u.id}')">Edit</button> ${toggle}</td></tr>`;
+    }).join('')
+  }</tbody></table>`;
+  renderUnassigned();
+}
+async function addRecommendedUnits(){
+  const recommended = [
+    {code:'DAYCARE',name:'Daycare',type:'daycare',sort_order:10,campus:'Main Campus'},
+    {code:'PLAYGROUP',name:'Playgroup (Nursery)',type:'preschool',sort_order:20,campus:'Main Campus'},
+    {code:'KINDER',name:'Kindergarten (K1 & K2)',type:'kindergarten',sort_order:30,campus:'Main Campus'},
+    {code:'ELEMENTARY',name:'Elementary (PKBM)',type:'elementary',sort_order:40,campus:'Gading Kirana'},
+    {code:'AMAZINGKIDS',name:'Amazing Kids Therapy Centre',type:'therapy',sort_order:50,campus:'Kelapa Gading'}
+  ];
+  const existing = new Set(UNITS.map(unit=>unit.code));
+  const missing = recommended.filter(unit=>!existing.has(unit.code));
+  if(!missing.length){ el('units_status').textContent='All recommended units already exist.'; return; }
+  const { error } = await sb.from('org_units').insert(missing.map(unit=>({...unit,status:'active'})));
+  if(error){ el('units_status').textContent='Could not add recommended units: '+error.message; return; }
+  el('units_status').textContent=`Added ${missing.length} recommended unit(s).`;
+  await loadAll();
+}
+function setUnitStatus(id, status){
+  if(status==='inactive'){ deactivateUnit(id); return; }
+  sb.from('org_units').update({ status:'active' }).eq('id', id).then(async r=>{
+    if(r.error){ alert('Could not activate: '+r.error.message); return; }
+    await loadAll();
+  });
+}
+function openAddUnit(){
+  EDIT_UNIT_ID = null;
+  el('um_title').textContent = 'Add unit';
+  el('um_code').value=''; el('um_name').value=''; el('um_type').value='elementary';
+  el('um_sort').value=0; el('um_status').value='active'; el('um_campus').value='';
+  el('um_address').value=''; el('um_email').value=''; el('um_phone').value='';
+  el('um_header').value=''; el('um_logo').value=''; el('um_logo_preview').innerHTML='';
+  el('um_err').textContent='';
+  el('unitModal').classList.add('open');
+}
+function openEditUnit(id){
+  const u = unitById(id); if(!u) return;
+  EDIT_UNIT_ID = id;
+  el('um_title').textContent = 'Edit unit';
+  el('um_code').value = u.code||''; el('um_name').value = u.name||'';
+  el('um_type').value = u.type||'other'; el('um_sort').value = u.sort_order||0;
+  el('um_status').value = u.status||'active'; el('um_campus').value = u.campus||'';
+  el('um_address').value = u.address||''; el('um_email').value = u.contact_email||'';
+  el('um_phone').value = u.contact_phone||''; el('um_header').value = u.invoice_header_text||'';
+  el('um_logo').value='';
+  const removeBtn = u.logo_path ? ` <button class="btn btn-ghost" type="button" onclick="removeUnitLogo('${u.id}')">Remove logo</button>` : '';
+  el('um_logo_preview').innerHTML = (unitLogoUrl(u) ? `<img src="${esc(unitLogoUrl(u))}" alt="current logo" style="max-width:120px;max-height:60px;object-fit:contain">` : '<span class="sub">No logo set.</span>') + removeBtn;
+  el('um_err').textContent='';
+  el('unitModal').classList.add('open');
+}
+function validateLogoFile(file){
+  if(!file) return null;
+  const mime = String(file.type||'').toLowerCase();
+  const okMime = ['image/png','image/jpeg','image/webp'].includes(mime);
+  const okExt = /\.(png|jpe?g|webp)$/i.test(file.name);
+  if(!okMime || !okExt) return 'Only PNG, JPEG, or WebP files are allowed (MIME and extension must both match).';
+  if(file.size > 2*1024*1024) return 'The logo must be 2 MB or smaller.';
+  return null;
+}
+async function verifyImageSignature(file){
+  // Match the magic-byte signature to the CLAIMED type (MIME + extension must
+  // agree). The Storage bucket MIME/size limits are the authoritative backstop.
+  try{
+    const buf = new Uint8Array(await file.slice(0, 16).arrayBuffer());
+    const mime = String(file.type||'').toLowerCase();
+    const isPngSig = buf.length>=8 && buf[0]===0x89 && buf[1]===0x50 && buf[2]===0x4E && buf[3]===0x47;
+    const isJpegSig = buf.length>=3 && buf[0]===0xFF && buf[1]===0xD8 && buf[2]===0xFF;
+    let isWebpSig = false;
+    if(buf.length>=12){
+      const riff = String.fromCharCode(buf[0],buf[1],buf[2],buf[3]);
+      const webp = String.fromCharCode(buf[8],buf[9],buf[10],buf[11]);
+      isWebpSig = riff==='RIFF' && webp==='WEBP';
+    }
+    const claimed = mime === 'image/png' ? 'png'
+      : mime === 'image/jpeg' ? 'jpeg'
+      : mime === 'image/webp' ? 'webp' : '';
+    if(claimed === 'png' && !isPngSig) return 'File content is not a PNG image.';
+    if(claimed === 'jpeg' && !isJpegSig) return 'File content is not a JPEG image.';
+    if(claimed === 'webp' && !isWebpSig) return 'File content is not a WebP image.';
+    if(!claimed && !isPngSig && !isJpegSig && !isWebpSig) return 'File content is not a recognized image.';
+    return null;
+  }catch(e){ return 'File content could not be read for validation.'; } // fail closed
+}
+async function saveUnit(){
+  const err = el('um_err'); err.textContent='';
+  const code = el('um_code').value.trim().toUpperCase();
+  const name = el('um_name').value.trim();
+  if(!code){ err.textContent='A unit code is required.'; return; }
+  if(!name){ err.textContent='A display name is required.'; return; }
+  if(UNITS.some(u=>u.code===code && u.id!==EDIT_UNIT_ID)){ err.textContent=`The code "${code}" is already used by another unit. Codes are permanent and never reused.`; return; }
+  const rec = {
+    code, name, type:el('um_type').value||null,
+    sort_order: parseInt(el('um_sort').value)||0,
+    status: el('um_status').value, campus: el('um_campus').value.trim()||null,
+    address: el('um_address').value.trim()||null,
+    contact_email: el('um_email').value.trim()||null,
+    contact_phone: el('um_phone').value.trim()||null,
+    invoice_header_text: el('um_header').value.trim()||null,
+    updated_at: new Date().toISOString()
+  };
+  let unitId = EDIT_UNIT_ID;
+  if(unitId){
+    const { error } = await sb.from('org_units').update(rec).eq('id', unitId);
+    if(error){ err.textContent='Could not save unit: '+error.message; return; }
+  } else {
+    const { data, error } = await sb.from('org_units').insert(rec).select('id').single();
+    if(error){ err.textContent='Could not save unit: '+error.message; return; }
+    unitId = data.id;
+  }
+  const file = el('um_logo').files && el('um_logo').files[0];
+  if(file){
+    const invalid = validateLogoFile(file) || await verifyImageSignature(file);
+    if(invalid){ err.textContent='Unit saved, but the logo was not uploaded: '+invalid; await loadAll(); return; }
+    const prev = unitById(unitId);
+    const upErr = await uploadUnitLogo(unitId, file, prev ? prev.logo_path : null);
+    if(upErr){ err.textContent='Unit saved, but the logo failed to upload: '+upErr; }
+  }
+  closeModal('unitModal');
+  await loadAll();
+}
+async function uploadUnitLogo(unitId, file, oldPath){
+  const ext = (file.name.match(/\.[a-z0-9]+$/i)||['.png'])[0].toLowerCase();
+  const safeName = newUuid() + ext;
+  const { error } = await sb.storage.from('logos').upload(safeName, file, { contentType:file.type, upsert:true });
+  if(error) return error.message;
+  const { error: upErr } = await sb.from('org_units').update({ logo_path:safeName }).eq('id', unitId);
+  if(upErr){
+    await sb.storage.from('logos').remove([safeName]).catch(()=>{});
+    return upErr.message;
+  }
+  if(oldPath && oldPath !== safeName){
+    await sb.storage.from('logos').remove([oldPath]).catch(()=>{});
+  }
+  return null;
+}
+async function removeUnitLogo(unitId){
+  const u = unitById(unitId); if(!u) return;
+  const oldPath = u.logo_path;
+  if(!oldPath){ alert('No logo to remove.'); return; }
+  if(!confirm('Remove this unit logo? Documents will fall back to the main Santa Aurelia logo.')) return;
+  const { error } = await sb.from('org_units').update({ logo_path:null }).eq('id', unitId);
+  if(error){ alert('Could not remove logo: '+error.message); return; }
+  const { error: delErr } = await sb.storage.from('logos').remove([oldPath]);
+  await loadAll();
+  if(delErr) alert('Logo removed from the unit, but the old file could not be deleted from storage: '+delErr.message);
+}
+function renderUnassigned(){
+  const box = el('unassignedBox'); if(!box) return;
+  const unassignedStudents = STUDENTS.filter(s=>!studentUnitId(s)).length;
+  const unassignedClasses = CLASSES.filter(c=>!c.org_unit_id).length;
+  const unassignedInvoices = INVOICES.filter(i=>!i.org_unit_id).length;
+  const unassignedExpenses = EXPENSES.filter(e=>!e.org_unit_id).length;
+  const total = unassignedStudents + unassignedClasses + unassignedInvoices + unassignedExpenses;
+  if(!total){ box.innerHTML='<div class="empty">Everything is assigned to a unit. Unit reports are complete.</div>'; return; }
+  box.innerHTML = `<table><thead><tr><th>Record type</th><th>Unassigned count</th></tr></thead><tbody>
+    <tr><td>Students</td><td>${formatIntegerID(unassignedStudents)}</td></tr>
+    <tr><td>Classes</td><td>${formatIntegerID(unassignedClasses)}</td></tr>
+    <tr><td>Invoices</td><td>${formatIntegerID(unassignedInvoices)}</td></tr>
+    <tr><td>Expenses</td><td>${formatIntegerID(unassignedExpenses)}</td></tr>
+  </tbody></table>
+  <p class="field-note" style="margin-top:10px">Assign classes to a unit below; students then inherit their class's unit. Until everything is assigned, unit financial reports are incomplete.</p>
+  <div id="unassigned_controls"></div>`;
+  renderUnassignedControls();
+}
+function renderUnassignedControls(){
+  const box = el('unassigned_controls'); if(!box) return;
+  const unitOpts = ['<option value="">— choose unit —</option>'].concat(UNITS.map(u=>`<option value="${u.id}">${esc(u.name)}</option>`)).join('');
+  const rows = [];
+  CLASSES.filter(c=>!c.org_unit_id).forEach(c=>{
+    rows.push(`<div class="d-row"><span class="k">Class: ${esc(c.name)}</span><select class="inline" data-kind="class" data-id="${c.id}">${unitOpts}</select></div>`);
+  });
+  box.innerHTML = rows.length ? `<div class="section-head"><h3 style="font-size:14px">Quick assign classes</h3></div>${rows.join('')}` : '<div class="empty">No unassigned classes. Students are assigned through their class.</div>';
+  box.querySelectorAll('select[data-kind]').forEach(sel=>{
+    sel.addEventListener('change', async ()=>{
+      if(!sel.value) return;
+      const id = sel.dataset.id;
+      const { error } = await sb.from('classes').update({ org_unit_id:sel.value }).eq('id', id);
+      if(error){ alert('Could not assign: '+error.message); return; }
+      await loadAll();
+    });
+  });
+}
+
+// ===== Tuition schedules =====
+let EDIT_SCHEDULE_ID = null;
+function componentOptions(selected){
+  return feeComponents().map(f=>`<option ${f===selected?'selected':''}>${esc(f)}</option>`).join('');
+}
+function renderSchedules(){
+  const box = el('schedulesTable'); if(!box) return;
+  if(!SCHEDULES.length){ box.innerHTML='<div class="empty">No tuition schedules yet. Add one per unit + component + term. The legacy term default is used until schedules exist.</div>'; return; }
+  const sorted = [...SCHEDULES].sort((a,b)=>(a.org_unit_id||'').localeCompare(b.org_unit_id||'')||(a.fee_component||'').localeCompare(b.fee_component||''));
+  box.innerHTML = `<table><thead><tr><th>Unit</th><th>Component</th><th>Term</th><th>Amount</th><th>Frequency</th><th>Effective</th><th>Status</th><th>Actions</th></tr></thead><tbody>${
+    sorted.map(s=>{
+      const term = ALLTERMS.find(t=>t.id===s.term_id);
+      const eff = [s.effective_start_date,s.effective_end_date].filter(Boolean).join(' → ')||'—';
+      const badge = s.status==='active'?'<span class="stamp paid">Active</span>':'<span class="stamp pending">Inactive</span>';
+      const deactivate = CURRENT_ROLE==='owner' && s.status==='active' ? `<button class="btn btn-ghost" onclick="deactivateSchedule('${s.id}')">Deactivate</button>` : '';
+      return `<tr><td>${esc(unitName(s.org_unit_id))}</td><td>${esc(s.fee_component)}</td><td class="sub">${esc(term?term.label:'— all terms —')}</td><td>${rp(s.amount)}</td><td class="sub">${esc(s.frequency)}</td><td class="sub">${esc(eff)}</td><td>${badge}</td><td style="white-space:nowrap"><button class="btn btn-ghost" onclick="openEditSchedule('${s.id}')">Edit</button> ${deactivate}</td></tr>`;
+    }).join('')
+  }</tbody></table>`;
+}
+function openAddSchedule(){
+  EDIT_SCHEDULE_ID = null;
+  el('sc_title').textContent='Add tuition schedule';
+  el('sc_unit').innerHTML = unitOptions('', false);
+  el('sc_term').innerHTML = ['<option value="">— none / all terms —</option>'].concat(ALLTERMS.map(t=>`<option value="${t.id}">${esc(t.label)}</option>`)).join('');
+  el('sc_component').innerHTML = componentOptions(TUITION_COMPONENT);
+  el('sc_amount').value=''; el('sc_frequency').value='monthly'; el('sc_dueday').value='';
+  el('sc_start').value=''; el('sc_end').value=''; el('sc_status').value='active'; el('sc_err').textContent='';
+  el('scheduleModal').classList.add('open');
+}
+function openEditSchedule(id){
+  const s = SCHEDULES.find(x=>x.id===id); if(!s) return;
+  EDIT_SCHEDULE_ID = id;
+  el('sc_title').textContent='Edit tuition schedule';
+  el('sc_unit').innerHTML = unitOptions(s.org_unit_id, false);
+  el('sc_term').innerHTML = ['<option value="">— none / all terms —</option>'].concat(ALLTERMS.map(t=>`<option value="${t.id}" ${t.id===s.term_id?'selected':''}>${esc(t.label)}</option>`)).join('');
+  el('sc_component').innerHTML = componentOptions(s.fee_component);
+  el('sc_amount').value = formatAmountInput(s.amount);
+  el('sc_frequency').value = s.frequency||'monthly'; el('sc_dueday').value = s.due_day||'';
+  el('sc_start').value = s.effective_start_date||''; el('sc_end').value = s.effective_end_date||'';
+  el('sc_status').value = s.status||'active'; el('sc_err').textContent='';
+  el('scheduleModal').classList.add('open');
+}
+function scheduleOverlapError(rec){
+  const clash = SCHEDULES.find(s=>s.id!==EDIT_SCHEDULE_ID && s.status==='active'
+    && s.org_unit_id===rec.org_unit_id && s.fee_component===rec.fee_component
+    && (s.term_id||null)===(rec.term_id||null));
+  return clash ? `Another active schedule already exists for ${clash.fee_component} in ${unitName(clash.org_unit_id)} for that term. Deactivate it first or choose a different term.` : null;
+}
+async function saveSchedule(){
+  const err = el('sc_err'); err.textContent='';
+  const unitId = el('sc_unit').value;
+  if(!unitId){ err.textContent='Choose a school unit.'; return; }
+  const amtCheck = isValidAmount(el('sc_amount').value, { allowZero:false });
+  if(!amtCheck.valid){ err.textContent = amtCheck.reason==='zero' ? 'Amount must be greater than zero (zero is reserved for a future scholarship design).' : amtCheck.reason==='negative' ? 'Amount cannot be negative.' : 'Enter a valid amount.'; return; }
+  const rec = {
+    org_unit_id: unitId, term_id: el('sc_term').value||null,
+    fee_component: el('sc_component').value, amount: amtCheck.value,
+    frequency: el('sc_frequency').value,
+    due_day: el('sc_dueday').value ? parseInt(el('sc_dueday').value)||null : null,
+    effective_start_date: el('sc_start').value||null, effective_end_date: el('sc_end').value||null,
+    status: el('sc_status').value, updated_at: new Date().toISOString()
+  };
+  if(rec.status==='active'){ const ov = scheduleOverlapError(rec); if(ov){ err.textContent = ov; return; } }
+  let error;
+  if(EDIT_SCHEDULE_ID) ({ error } = await sb.from('tuition_schedules').update(rec).eq('id', EDIT_SCHEDULE_ID));
+  else ({ error } = await sb.from('tuition_schedules').insert(rec));
+  if(error){ err.textContent = 'Could not save schedule: ' + error.message; return; }
+  closeModal('scheduleModal');
+  await loadAll();
+}
+
+// ===== Student tuition overrides =====
+let EDIT_OVERRIDE_ID = null;
+function renderOverrides(){
+  const box = el('overridesTable'); if(!box) return;
+  if(!OVERRIDES.length){ box.innerHTML='<div class="empty">No student overrides yet. Add one for a scholarship, sibling discount, or negotiated fee.</div>'; return; }
+  const studentName = id => { const s = STUDENTS.find(x=>x.id===id); return s?s.name:'—'; };
+  box.innerHTML = `<table><thead><tr><th>Student</th><th>Unit</th><th>Component</th><th>Amount</th><th>Reason</th><th>Effective</th><th>Status</th><th>Actions</th></tr></thead><tbody>${
+    OVERRIDES.map(o=>{
+      const eff = [o.effective_start,o.effective_end].filter(Boolean).join(' → ')||'—';
+      const badge = o.status==='active'?'<span class="stamp paid">Active</span>':'<span class="stamp pending">Inactive</span>';
+      const deactivate = CURRENT_ROLE==='owner' && o.status==='active' ? `<button class="btn btn-ghost" onclick="deactivateOverride('${o.id}')">Deactivate</button>` : '';
+      return `<tr><td>${esc(studentName(o.student_id))}</td><td>${esc(unitName(o.org_unit_id))}</td><td>${esc(o.fee_component)}</td><td>${rp(o.amount)}</td><td class="sub">${esc(o.reason)}</td><td class="sub">${esc(eff)}</td><td>${badge}</td><td style="white-space:nowrap"><button class="btn btn-ghost" onclick="openEditOverride('${o.id}')">Edit</button> ${deactivate}</td></tr>`;
+    }).join('')
+  }</tbody></table>`;
+}
+function openAddOverride(){
+  EDIT_OVERRIDE_ID = null;
+  el('ov_title').textContent='Add student tuition override';
+  el('ov_student').innerHTML = STUDENTS.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join('') || '<option value="">No students</option>';
+  el('ov_unit').innerHTML = unitOptions('', false);
+  el('ov_component').innerHTML = componentOptions(TUITION_COMPONENT);
+  el('ov_amount').value=''; el('ov_status').value='active'; el('ov_start').value=''; el('ov_end').value='';
+  el('ov_reason').value=''; el('ov_err').textContent='';
+  el('overrideModal').classList.add('open');
+}
+function openEditOverride(id){
+  const o = OVERRIDES.find(x=>x.id===id); if(!o) return;
+  EDIT_OVERRIDE_ID = id;
+  el('ov_title').textContent='Edit student tuition override';
+  el('ov_student').innerHTML = STUDENTS.map(s=>`<option value="${s.id}" ${s.id===o.student_id?'selected':''}>${esc(s.name)}</option>`).join('');
+  el('ov_unit').innerHTML = unitOptions(o.org_unit_id, false);
+  el('ov_component').innerHTML = componentOptions(o.fee_component);
+  el('ov_amount').value = formatAmountInput(o.amount);
+  el('ov_status').value = o.status||'active'; el('ov_start').value = o.effective_start||''; el('ov_end').value = o.effective_end||'';
+  el('ov_reason').value = o.reason||''; el('ov_err').textContent='';
+  el('overrideModal').classList.add('open');
+}
+function overrideOverlapError(rec){
+  const clash = OVERRIDES.find(o=>o.id!==EDIT_OVERRIDE_ID && o.status==='active'
+    && o.student_id===rec.student_id && o.fee_component===rec.fee_component
+    && (!o.org_unit_id || !rec.org_unit_id || o.org_unit_id===rec.org_unit_id)
+    && (!o.effective_end || !rec.effective_start || o.effective_end>=rec.effective_start)
+    && (!rec.effective_end || !o.effective_start || rec.effective_end>=o.effective_start));
+  return clash ? 'Another active override already covers this student for the same component and period. Deactivate it first.' : null;
+}
+async function saveOverride(){
+  const err = el('ov_err'); err.textContent='';
+  const sid = el('ov_student').value;
+  const unitId = el('ov_unit').value;
+  if(!sid){ err.textContent='Choose a student.'; return; }
+  if(!unitId){ err.textContent='Choose a school unit.'; return; }
+  const reason = el('ov_reason').value.trim();
+  if(!reason){ err.textContent='A reason is required for every override.'; return; }
+  const amtCheck = isValidAmount(el('ov_amount').value, { allowZero:false });
+  if(!amtCheck.valid){ err.textContent = amtCheck.reason==='zero' ? 'Override amount must be greater than zero.' : amtCheck.reason==='negative' ? 'Override amount cannot be negative.' : 'Enter a valid amount.'; return; }
+  const rec = {
+    student_id:sid, org_unit_id:unitId, fee_component:el('ov_component').value,
+    amount: amtCheck.value, reason, effective_start:el('ov_start').value||null,
+    effective_end:el('ov_end').value||null, status:el('ov_status').value, updated_at:new Date().toISOString()
+  };
+  if(rec.status==='active'){ const ov = overrideOverlapError(rec); if(ov){ err.textContent = ov; return; } }
+  let error;
+  if(EDIT_OVERRIDE_ID) ({ error } = await sb.from('student_tuition_overrides').update(rec).eq('id', EDIT_OVERRIDE_ID));
+  else ({ error } = await sb.from('student_tuition_overrides').insert(rec));
+  if(error){ err.textContent = 'Could not save override: ' + error.message; return; }
+  closeModal('overrideModal');
+  await loadAll();
+}
+// ===== Expenses =====
+let EDIT_EXPENSE_ID = null;
+function expenseStatusBadge(s){
+  return s==='draft'?'<span class="stamp pending">Draft</span>':s==='approved'?'<span class="stamp paid">Approved</span>':s==='paid'?'<span class="stamp paid">Paid</span>':'<span class="stamp overdue">Void</span>';
+}
+function renderExpenses(targetId='expensesTable', options={}){
+  const box = el(targetId); if(!box) return;
+  const unitId = options.unitId || '';
+  const from = options.from || '', to = options.to || '';
+  const inRange = d => (!from || (d && d>=from)) && (!to || (d && d<=to));
+  let sorted = EXPENSES.filter(x=>(!unitId||x.org_unit_id===unitId)&&inRange(x.expense_date)).sort((a,b)=>(b.expense_date||'').localeCompare(a.expense_date||''));
+  if(options.limit) sorted=sorted.slice(0,options.limit);
+  if(!sorted.length){ box.innerHTML='<div class="empty">No expenses recorded for this selection yet. Click "+ Record expense".</div>'; return; }
+  box.innerHTML = `<table><thead><tr><th>Date</th><th>Level / unit</th><th>Detail</th><th>Total</th><th>Status</th><th>Actions</th></tr></thead><tbody>${
+    sorted.map(x=>{
+      let actions = ['draft','approved'].includes(x.status) ? `<button class="btn btn-ghost" onclick="openEditExpense('${x.id}')">Edit</button>` : '<span class="sub">—</span>';
+      if(CURRENT_ROLE==='owner' && x.status==='draft') actions += ` <button class="btn btn-ghost" onclick="deleteDraftExpense('${x.id}')">Delete</button>`;
+      if(CURRENT_ROLE==='owner' && x.status!=='void') actions += ` <button class="btn btn-ghost" onclick="voidExpense('${x.id}')">Void</button>`;
+      return `<tr><td class="sub">${esc(x.expense_date||'')}</td><td>${esc(unitName(x.org_unit_id))}</td><td>${esc(x.description||x.category||'—')}</td><td>${rp(x.amount)}</td><td>${expenseStatusBadge(x.status)}</td><td style="white-space:nowrap">${actions}</td></tr>`;
+    }).join('')
+  }</tbody></table>`;
+}
+function localDateISO(date=new Date()){
+  const y=date.getFullYear(), m=String(date.getMonth()+1).padStart(2,'0'), d=String(date.getDate()).padStart(2,'0');
+  return `${y}-${m}-${d}`;
+}
+function setExpenseDate(which){
+  const date = new Date();
+  if(which==='yesterday') date.setDate(date.getDate()-1);
+  if(which==='month-start') date.setDate(1);
+  el('em_date').value = localDateISO(date);
+}
+function formatExpenseAmountInput(){
+  const input=el('em_amount');
+  const digits=(input.value||'').replace(/\D/g,'').replace(/^0+(?=\d)/,'');
+  input.value=digits ? Number(digits).toLocaleString('id-ID') : '';
+}
+function openAddExpense(){
+  EDIT_EXPENSE_ID = null;
+  el('em_title').textContent='Add expense';
+  el('em_date').max = localDateISO(); el('em_date').value = localDateISO();
+  el('em_unit').innerHTML = unitOptions('', true);
+  el('em_category').value='General'; el('em_amount').value=''; el('em_vendor').value='';
+  el('em_ref').value=''; el('em_desc').value=''; el('em_status').value='draft'; el('em_attach').value='';
+  el('em_err').textContent='';
+  el('em_save').disabled=false; el('em_save').textContent='Save expense';
+  el('expenseModal').classList.add('open');
+  setTimeout(()=>el('em_desc').focus(),0);
+}
+function openEditExpense(id){
+  const x = EXPENSES.find(e=>e.id===id); if(!x) return;
+  EDIT_EXPENSE_ID = id;
+  el('em_title').textContent='Edit expense';
+  el('em_date').max = localDateISO(); el('em_date').value = x.expense_date||''; el('em_unit').innerHTML = unitOptions(x.org_unit_id, true);
+  el('em_category').value = x.category||''; el('em_amount').value = formatAmountInput(x.amount);
+  el('em_vendor').value = x.vendor||''; el('em_ref').value = x.reference_no||''; el('em_desc').value = x.description||'';
+  el('em_status').value = x.status||'draft'; el('em_attach').value = x.attachment_path||'';
+  el('em_err').textContent='';
+  el('em_save').disabled=false; el('em_save').textContent='Save expense';
+  el('expenseModal').classList.add('open');
+}
+async function saveExpense(){
+  const err = el('em_err'); err.textContent='';
+  const saveButton = el('em_save');
+  const unitId = el('em_unit').value;
+  const date = el('em_date').value;
+  const detail = el('em_desc').value.trim();
+  if(!date){ err.textContent='Choose an expense date.'; return; }
+  if(date>localDateISO()){ err.textContent='Expense date cannot be in the future.'; return; }
+  if(!unitId){ err.textContent='Choose a school unit (required for new expenses).'; return; }
+  if(!detail){ err.textContent='Enter the expense detail.'; return; }
+  const amtCheck = isValidAmount(el('em_amount').value, { allowZero:false, allowNegative:false });
+  if(!amtCheck.valid){ err.textContent = 'Enter a valid positive amount.'; return; }
+  saveButton.disabled=true; saveButton.textContent='Saving…';
+  try{
+    let error;
+    if(EDIT_EXPENSE_ID){
+      const rec = {
+        expense_date:date, org_unit_id:unitId, category:el('em_category').value.trim()||'General',
+        amount:amtCheck.value, vendor:el('em_vendor').value.trim()||null, description:detail,
+        reference_no:el('em_ref').value.trim()||null, attachment_path:el('em_attach').value.trim()||null,
+        status:el('em_status').value, updated_at:new Date().toISOString()
+      };
+      ({ error } = await sb.from('expenses').update(rec).eq('id', EDIT_EXPENSE_ID));
+    } else {
+      ({ error } = await sb.rpc('finance_record_expense',{
+        p_expense_date:date, p_org_unit_id:unitId, p_description:detail, p_amount:amtCheck.value
+      }));
+    }
+    if(error){ err.textContent='Could not save expense: '+error.message; return; }
+    closeModal('expenseModal');
+    await loadAll();
+    const status=el(ACTIVE==='finance'?'finance_status':'expenses_status');
+    if(status) status.textContent='Expense saved and included in the monthly report. '+status.textContent;
+  } catch(ex) {
+    err.textContent='Could not save expense: '+(ex&&ex.message?ex.message:'Unexpected connection error.');
+  } finally {
+    saveButton.disabled=false; saveButton.textContent='Save expense';
+  }
+}
+function voidExpense(id){
+  const x = EXPENSES.find(e=>e.id===id); if(!x) return;
+  openRemoval({ kind:'void_expense', id, title:'Void expense',
+    description:`Void the "${x.category||'expense'}" expense of ${formatCurrencyIDR(x.amount)}?`,
+    consequence:'The expense is kept in history and no longer counts toward spending.',
+    confirmLabel:'Void expense' });
+}
+function deleteDraftExpense(id){
+  const x = EXPENSES.find(e=>e.id===id); if(!x) return;
+  openRemoval({ kind:'delete_draft_expense', id, title:'Delete draft expense',
+    description:`Delete the draft "${x.category||'expense'}" expense of ${formatCurrencyIDR(x.amount)}?`,
+    consequence:'A full snapshot is saved to Deleted Data. Approved or paid expenses cannot be deleted.',
+    confirmLabel:'Delete draft' });
+}
+
+// ===== Finance logic (testable block) =====
+const FINANCE_LOGIC = (() => {
+  function isVoid(status){ return status === 'void'; }
+  function isCashPaidExpense(status){ return status === 'paid'; }
+  function isCommittedExpense(status){ return status === 'draft' || status === 'approved'; }
+  function sum(arr, key){ return (arr||[]).reduce((s,x)=>s+Number(x[key]||0),0); }
+  function cashSurplus(collected, paidExpenses){ return collected - paidExpenses; }
+  function collectPayments(invoices, from, to){
+    // Net the payment trail: sum positive payments and negative reversal rows,
+    // attributed by each entry's business date. Undated entries go to a legacy
+    // bucket. Reconcile any paid_amount not represented by the trail as legacy.
+    let dated = 0, undated = 0;
+    (invoices||[]).forEach(i=>{
+      const pays = Array.isArray(i.payments) ? i.payments : [];
+      pays.forEach(p=>{
+        const amt = Number(p && p.amount || 0);
+        if(!amt) return;
+        if(p.date && (!from || p.date >= from) && (!to || p.date <= to)) dated += amt;
+        else if(!p.date) undated += amt;
+      });
+      const positiveTrail = pays.filter(p=>!p.reversal).reduce((s,p)=>s+Number(p && p.amount || 0), 0);
+      const paid = Number(i.paid_amount || 0);
+      if(paid > positiveTrail) undated += (paid - positiveTrail);
+    });
+    return { dated, undated };
+  }
+  function recognizedCash(invoices, from, to){
+    const payments = collectPayments(invoices, from, to);
+    return payments.dated + ((!from && !to) ? payments.undated : 0);
+  }
+  return { isVoid, isCashPaidExpense, isCommittedExpense, sum, cashSurplus, collectPayments, recognizedCash };
+})();
+// ===== /Finance logic =====
+
+// ===== Finance summary (management / cash-basis) =====
+// Cash surplus is presented to users as estimated cash profit.
+// This is not full accounting profit and the status reiterates that it is not accounting profit.
+function financeMonthBounds(month){
+  if(!/^\d{4}-\d{2}$/.test(month||'')) return {from:'',to:''};
+  const [year,monthNumber]=month.split('-').map(Number);
+  const lastDay=new Date(year,monthNumber,0).getDate();
+  return {from:`${month}-01`,to:`${month}-${String(lastDay).padStart(2,'0')}`};
+}
+function formatFinanceMonth(month){
+  if(!month) return 'All time';
+  const [year,monthNumber]=month.split('-').map(Number);
+  return new Intl.DateTimeFormat(window.SantaI18n?SantaI18n.locale():'en-GB',{month:'long',year:'numeric'}).format(new Date(year,monthNumber-1,1));
+}
+function applyFinanceMonth(){
+  const bounds=financeMonthBounds(el('fin_month').value);
+  el('fin_from').value=bounds.from; el('fin_to').value=bounds.to;
+  renderFinance();
+}
+function shiftFinanceMonth(offset){
+  const input=el('fin_month');
+  const base=/^\d{4}-\d{2}$/.test(input.value)?input.value:localDateISO().slice(0,7);
+  const [year,monthNumber]=base.split('-').map(Number);
+  const shifted=new Date(year,monthNumber-1+offset,1);
+  input.value=`${shifted.getFullYear()}-${String(shifted.getMonth()+1).padStart(2,'0')}`;
+  applyFinanceMonth();
+}
+function showAllFinanceMonths(){
+  el('fin_month').value=''; el('fin_from').value=''; el('fin_to').value=''; renderFinance();
+}
+function renderFinance(){
+  const unitSel = el('fin_unit');
+  if(unitSel && !unitSel.dataset.filled){
+    unitSel.innerHTML = '<option value="">All Units</option>' + UNITS.map(u=>`<option value="${u.id}">${esc(u.name)}</option>`).join('');
+    unitSel.dataset.filled = '1';
+  }
+  const box = el('financeBox');
+  const status = el('finance_status');
+  const unitId = unitSel ? unitSel.value : '';
+  const monthInput=el('fin_month');
+  if(monthInput && !monthInput.dataset.ready){ monthInput.value=localDateISO().slice(0,7); monthInput.dataset.ready='1'; }
+  const monthValue=monthInput?monthInput.value:'';
+  const bounds=financeMonthBounds(monthValue);
+  const from=bounds.from, to=bounds.to;
+  if(el('fin_from')) el('fin_from').value=from;
+  if(el('fin_to')) el('fin_to').value=to;
+  const inRange = d => { if(!from && !to) return true; if(from && (!d || d<from)) return false; if(to && (!d || d>to)) return false; return true; };
+
+  const snapshot = financeSnapshot(unitId, from, to);
+  const collected = snapshot.revenue, paidExp = snapshot.expenses, surplus = snapshot.profit;
+  const invs = INVOICES.filter(i=>i.status!=='void' && (!unitId || i.org_unit_id===unitId) && inRange(i.due_date||i.created_at||null));
+  const lineBilled = INVOICE_LINES.filter(l=>l.status==='active'&&l.fee_component===TUITION_COMPONENT&&(!unitId||l.org_unit_id===unitId)&&inRange(l.service_period_start||l.service_period_end||null)).reduce((s,l)=>s+Number(l.amount||0),0);
+  const invoicesBilled = FINANCE_LOGIC.sum(invs,'amount');
+  const committedExp = FINANCE_LOGIC.sum(EXPENSES.filter(e=>FINANCE_LOGIC.isCommittedExpense(e.status)&&(!unitId||e.org_unit_id===unitId)&&inRange(e.expense_date)),'amount');
+  const outstanding = invs.reduce((s,i)=>s+Math.max(0,Number(i.amount||0)-Number(i.paid_amount||0)),0);
+  const unitLabel = unitId ? unitName(unitId) : 'All Units';
+  status.textContent = `Monthly financial report · ${formatFinanceMonth(monthValue)} · ${unitLabel}. Revenue is cash received from student invoices; expenses include paid records only.`;
+  const unitsForTable = unitId ? UNITS.filter(u=>u.id===unitId) : UNITS.filter(u=>u.status==='active');
+  const unitRows = unitsForTable.map(u=>({name:u.name,...financeSnapshot(u.id,from,to)}));
+  const hasUnassigned = INVOICES.some(i=>!i.org_unit_id) || EXPENSES.some(e=>!e.org_unit_id);
+  if(!unitId && hasUnassigned) unitRows.push({name:'Unassigned unit',...financeSnapshot(null,from,to,true)});
+  const breakdown = revenueBreakdown(unitId,from,to);
+  box.innerHTML = `<div class="kpi-row finance-kpis" style="grid-template-columns:repeat(4,1fr);margin-bottom:24px">
+    <div class="kpi"><div class="kpi-label">Revenue from students</div><div class="kpi-value finance-positive">${rp(collected)}</div></div>
+    <div class="kpi"><div class="kpi-label">Cash expenses (paid)</div><div class="kpi-value">${rp(paidExp)}</div></div>
+    <div class="kpi"><div class="kpi-label">Estimated cash profit</div><div class="kpi-value ${surplus<0?'finance-negative':'finance-positive'}">${rp(surplus)}</div></div>
+    <div class="kpi"><div class="kpi-label">Outstanding balance</div><div class="kpi-value">${rp(outstanding)}</div></div>
+  </div>
+  <div class="kpi-row finance-kpis" style="grid-template-columns:repeat(3,1fr);margin-bottom:24px">
+    <div class="kpi"><div class="kpi-label">Billed tuition (active lines)</div><div class="kpi-value">${rp(lineBilled)}</div></div>
+    <div class="kpi"><div class="kpi-label">Invoices billed (all non-void)</div><div class="kpi-value">${rp(invoicesBilled)}</div></div>
+    <div class="kpi"><div class="kpi-label">Committed (draft/approved)</div><div class="kpi-value">${rp(committedExp)}</div></div>
+  </div>
+  <div class="section-head"><h2>Performance by school unit</h2></div>
+  <div class="finance-table-wrap"><table><thead><tr><th>Unit</th><th>Revenue</th><th>Expenses</th><th>Profit</th><th>Margin</th></tr></thead><tbody>${
+    unitRows.length ? unitRows.map(row=>`<tr><td><strong>${esc(row.name)}</strong></td><td>${rp(row.revenue)}</td><td>${rp(row.expenses)}</td><td class="${row.profit<0?'finance-negative':'finance-positive'}">${rp(row.profit)}</td><td>${row.revenue?Math.round(row.profit/row.revenue*100)+'%':'—'}</td></tr>`).join('') : '<tr><td colspan="5" class="empty">Add school units to compare every level.</td></tr>'
+  }</tbody></table></div>
+  <div class="section-head"><h2>Student revenue by fee type</h2></div>
+  <div class="finance-table-wrap"><table><thead><tr><th>Fee component</th><th>Collected</th><th>Share</th></tr></thead><tbody>${
+    breakdown.length ? breakdown.map(row=>`<tr><td>${esc(row.label)}</td><td>${rp(row.amount)}</td><td>${collected?Math.round(row.amount/collected*100)+'%':'—'}</td></tr>`).join('') : '<tr><td colspan="3" class="empty">No student payments for this selection.</td></tr>'
+  }</tbody></table></div>`;
+  const unassignedCount = INVOICES.filter(i=>!i.org_unit_id).length + EXPENSES.filter(e=>!e.org_unit_id).length;
+  if(unassignedCount && !unitId){
+    box.innerHTML += `<div class="panel-item"><div><div class="who">Unassigned-unit records</div><div class="meta">${unassignedCount} invoice(s)/expense(s) have no unit. They are not part of any single-unit total; assign them on the Units tab so unit reports are complete.</div></div></div>`;
+  }
+  renderExpenses('financeExpensesTable',{unitId,from,to,limit:8});
+  if(window.SantaI18n) SantaI18n.refresh();
+}
+
+function financeSnapshot(unitId, from, to, exactUnassigned=false){
+  const matches = value => exactUnassigned ? !value : (!unitId || value===unitId);
+  const cashInvoices = INVOICES.filter(i=>matches(i.org_unit_id));
+  const revenue = FINANCE_LOGIC.recognizedCash(cashInvoices,from,to);
+  const inRange = d => (!from||(d&&d>=from))&&(!to||(d&&d<=to));
+  const expenses = FINANCE_LOGIC.sum(EXPENSES.filter(e=>FINANCE_LOGIC.isCashPaidExpense(e.status)&&matches(e.org_unit_id)&&inRange(e.expense_date)),'amount');
+  return { revenue, expenses, profit:FINANCE_LOGIC.cashSurplus(revenue,expenses) };
+}
+
+function invoiceComponents(invoice){
+  const lines = INVOICE_LINES.filter(line=>line.invoice_id===invoice.id&&line.status==='active');
+  if(lines.length) return lines.map(line=>({label:line.fee_component||'Other',amount:Number(line.amount||0)}));
+  const items = Array.isArray(invoice.items) ? invoice.items : [];
+  if(items.length) return items.map(item=>({label:item.label||'Other',amount:Number(item.amount||0)}));
+  return [{label:'Other student fees',amount:Number(invoice.amount||0)}];
+}
+
+function revenueBreakdown(unitId,from,to){
+  const totals = new Map();
+  INVOICES.filter(i=>!unitId||i.org_unit_id===unitId).forEach(invoice=>{
+    const cash = FINANCE_LOGIC.recognizedCash([invoice],from,to);
+    if(!cash) return;
+    const components = invoiceComponents(invoice);
+    const base = components.reduce((sum,item)=>sum+Math.max(0,item.amount),0)||1;
+    components.forEach(item=>totals.set(item.label,(totals.get(item.label)||0)+(cash*Math.max(0,item.amount)/base)));
+  });
+  return [...totals.entries()].map(([label,amount])=>({label,amount})).sort((a,b)=>b.amount-a.amount);
+}
+
+// ===== Unit branding on documents =====
+function mainBrandingLogo(){
+  const central = UNITS.find(u=>u.type==='central' && u.status==='active' && u.logo_path);
+  return central ? unitLogoUrl(central) : null;
+}
+function docBranding(unitId){
+  const u = unitById(unitId);
+  if(u) return { name: u.name, header: u.invoice_header_text||'', logo: unitLogoUrl(u) || mainBrandingLogo(), address: u.address||'' };
+  return { name: bizName(), header: '', logo: mainBrandingLogo(), address: '' };
+}
+function pdfInvoice(id){
+  const i = INVOICES.find(x=>x.id===id); if(!i) return;
+  const br = docBranding(i.org_unit_id);
+  const w = window.open('', '_blank');
+  const paid = Number(i.paid_amount||0), total = Number(i.amount||0), remain = Math.max(0,total-paid);
+  const isPaid = remain<=0;
+  const items = Array.isArray(i.items)&&i.items.length ? i.items : [{label:i.note||'Biaya', amount:total}];
+  const itemRows = items.map(x=>`<tr><td>${esc(x.label)}</td><td style="text-align:right">${rp(x.amount)}</td></tr>`).join('');
+  const logoHtml = br.logo ? `<img src="${esc(br.logo)}" alt="${esc(br.name)} logo" style="height:52px;max-width:200px;object-fit:contain">` : '';
+  const unitLine = br.header ? `<div class="sub">${esc(br.header)}</div>` : '';
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Invoice ${esc(i.parents?.name||'')}</title>
+  <style>body{font-family:Georgia,serif;color:#1B2A4A;max-width:640px;margin:40px auto;padding:0 24px}
+  .head{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #1B2A4A;padding-bottom:16px;margin-bottom:24px}
+  h1{font-size:24px;margin:0} .sub{color:#6B7280;font-size:13px}
+  .stamp{display:inline-block;border:2px dashed ${isPaid?'#2F5D50':'#B5502D'};color:${isPaid?'#2F5D50':'#B5502D'};padding:4px 14px;border-radius:20px;font-size:13px;font-weight:bold;transform:rotate(-4deg);text-transform:uppercase}
+  table{width:100%;border-collapse:collapse;margin:20px 0} td,th{text-align:left;padding:9px 0;border-bottom:1px solid #d9d4c7;font-size:14px}
+  .tot td{font-weight:bold;font-size:16px;border-top:2px solid #1B2A4A} .foot{color:#6B7280;font-size:12px;margin-top:40px;border-top:1px solid #d9d4c7;padding-top:12px}</style></head>
+  <body>
+  <div class="head"><div>${logoHtml}<h1>${esc(br.name)}</h1>${unitLine}<div class="sub">Invoice · ${esc(TERM?TERM.label:'')}</div></div><div class="stamp">${isPaid?'Lunas':'Belum Lunas'}</div></div>
+  <div style="margin-bottom:8px"><strong>Keluarga:</strong> ${esc(i.parents?.name||'')} &nbsp;·&nbsp; <strong>Jatuh tempo:</strong> ${esc(i.due_date||'-')}</div>
+  <table>
+    <tr><th>Komponen</th><th style="text-align:right">Jumlah</th></tr>
+    ${itemRows}
+    <tr class="tot"><td>Total</td><td style="text-align:right">${rp(total)}</td></tr>
+    <tr><td>Terbayar</td><td style="text-align:right">${rp(paid)}</td></tr>
+    <tr><td><strong>Sisa</strong></td><td style="text-align:right"><strong>${rp(remain)}</strong></td></tr>
+  </table>
+  <div class="foot">Mohon diselesaikan sebelum jatuh tempo.${(BANK.name||BANK.account)?' Pembayaran: '+esc(BANK.name)+(BANK.account?' '+esc(BANK.account):'')+'.':''} — ${esc(br.name)}</div>
+  <script>window.onload=function(){window.print()}<\/script>
+  </body></html>`);
+  w.document.close();
 }
 
 // ===== Connection check =====
@@ -1749,6 +3273,9 @@ async function pingConnection(){
 }
 
 // ===== Boot =====
+document.addEventListener('santa-language-change', ()=>{
+  if(el('app').style.display!=='none') refreshActiveView();
+});
 checkAuthState();
 setTimeout(()=>{ if(el('login').style.display!=='none') pingConnection(); }, 300);
 </script>
