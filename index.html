@@ -129,6 +129,14 @@
   .finance-table-wrap table{min-width:720px}
   .finance-table-wrap td:not(:first-child),.finance-table-wrap th:not(:first-child){text-align:right}
   .finance-kpis .kpi-value{font-size:clamp(20px,2.5vw,30px)}
+  .expense-ledger-wrap{overflow-x:auto;border:1px solid var(--hairline);background:var(--paper-raised)}
+  .expense-ledger-wrap table{border:0;min-width:920px}
+  .expense-ledger-wrap th{position:sticky;top:0;background:var(--paper);z-index:1}
+  .expense-ledger-wrap td.amount,.expense-ledger-wrap th.amount{text-align:right;font-family:var(--mono);white-space:nowrap}
+  .expense-ledger-wrap td.entry-user{white-space:nowrap}
+  .expense-ledger-meta{display:flex;justify-content:space-between;gap:12px;align-items:center;margin:18px 0 8px;flex-wrap:wrap}
+  .expense-ledger-meta h3{font-family:var(--serif);font-size:16px;font-weight:600}
+  .expense-report-note{font-size:12px;color:var(--slate);margin:-8px 0 14px}
   .finance-filters{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-bottom:18px}
   .finance-filter{min-width:220px}
   .finance-filter>label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--slate);margin-bottom:5px}
@@ -457,8 +465,17 @@
     <div id="view-expenses" style="display:none">
       <div class="section-head"><h2>Expenses</h2><button class="btn btn-primary" onclick="openAddExpense()">+ Add expense</button></div>
       <p style="color:var(--slate);font-size:13px;margin-bottom:16px">Record spending by date and school level. New entries are posted as paid expenses and included in the monthly report immediately.</p>
+      <div class="finance-filters">
+        <div class="finance-filter"><label for="expense_unit">Level / unit</label><select id="expense_unit" class="inline" style="max-width:260px" onchange="renderExpenses()"></select></div>
+        <div class="finance-filter"><label for="expense_month">Ledger month</label><input id="expense_month" type="month" class="inline" style="max-width:220px" onchange="renderExpenses()"></div>
+        <button type="button" class="btn btn-ghost" onclick="showAllExpenseMonths()">All time</button>
+      </div>
       <div id="expenses_status" role="status" aria-live="polite" style="font-size:13px;margin-bottom:12px"></div>
-      <div id="expensesTable"><div class="empty">Loading…</div></div>
+      <div class="expense-ledger-meta"><h3>Month on month expense</h3><span class="sub" id="expenseSummaryRange"></span></div>
+      <p class="expense-report-note">Paid expenses only. This table shows the last 12 months ending with the selected month.</p>
+      <div id="expenseMonthSummary"><div class="empty">Loading…</div></div>
+      <div class="expense-ledger-meta"><h3>Expense ledger</h3><span class="sub" id="expenseLedgerCount"></span></div>
+      <div id="expensesTable" class="expense-ledger-wrap"><div class="empty">Loading…</div></div>
     </div>
 
     <!-- FINANCE -->
@@ -774,7 +791,7 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // ===== Globals =====
 let TERM=null, ALLTERMS=[], CFG={}, BANK={}, STUDENTS=[], PARENTS=[], INVOICES=[], CLASSES=[], TEACHERS=[], STAFF=[], ATTENDANCE=[], INCIDENTS=[], ENROLLMENTS=[], HISTORY=[], DELETED_DATA=[];
-let UNITS=[], SCHEDULES=[], OVERRIDES=[], EXPENSES=[], INVOICE_LINES=[], ALL_STUDENTS=[];
+let UNITS=[], SCHEDULES=[], OVERRIDES=[], EXPENSES=[], INVOICE_LINES=[], EXPENSE_INPUTTERS=[], ALL_STUDENTS=[];
 let INCLUDE_ARCHIVED = false;
 let ACTIVE='overview';
 let CURRENT_ROLE='owner';
@@ -1106,12 +1123,15 @@ async function loadAll(){
   INCIDENTS   = incidents?.data || [];
   ENROLLMENTS = enrollments?.data || [];
 
-  const extResults = await Promise.all([
+  const [extResults, expenseInputters] = await Promise.all([
+    Promise.all([
     fetchExtensionTable('org_units', 'sort_order'),
     fetchExtensionTable('tuition_schedules', 'fee_component'),
     fetchExtensionTable('student_tuition_overrides', 'effective_start'),
     fetchExtensionTable('expenses', 'expense_date'),
     fetchExtensionTable('invoice_lines', 'created_at')
+    ]),
+    sb.rpc('finance_expense_inputters')
   ]);
   const ext = {}; extResults.forEach(r=>ext[r.table]=r);
   UNITS         = ext['org_units'].data;
@@ -1119,6 +1139,7 @@ async function loadAll(){
   OVERRIDES     = ext['student_tuition_overrides'].data;
   EXPENSES      = ext['expenses'].data;
   INVOICE_LINES = ext['invoice_lines'].data;
+  EXPENSE_INPUTTERS = expenseInputters?.data || [];
   extResults.forEach(r=>{
     if(r.ok) return;
     if(r.kind==='missing_migration') SETUP.missing[r.table]=r.error;
@@ -2957,20 +2978,70 @@ let EDIT_EXPENSE_ID = null;
 function expenseStatusBadge(s){
   return s==='draft'?'<span class="stamp pending">Draft</span>':s==='approved'?'<span class="stamp paid">Approved</span>':s==='paid'?'<span class="stamp paid">Paid</span>':'<span class="stamp overdue">Void</span>';
 }
+function expenseInputterName(id){
+  if(!id) return 'Unknown';
+  const matched = EXPENSE_INPUTTERS.find(x=>x.user_id===id) || STAFF.find(x=>x.id===id);
+  return matched ? (matched.display_name||matched.name||'Unnamed user') : 'Unknown';
+}
+function ensureExpenseLedgerFilters(){
+  const unitSelect=el('expense_unit'), monthInput=el('expense_month');
+  if(unitSelect && !unitSelect.dataset.filled){
+    unitSelect.innerHTML='<option value="">All Units</option>'+UNITS.map(u=>`<option value="${u.id}">${esc(u.name)}</option>`).join('');
+    unitSelect.dataset.filled='1';
+  }
+  if(monthInput && !monthInput.dataset.ready){
+    monthInput.value=localDateISO().slice(0,7); monthInput.dataset.ready='1';
+  }
+}
+function showAllExpenseMonths(){
+  const monthInput=el('expense_month'); if(monthInput) monthInput.value='';
+  renderExpenses();
+}
+function expenseReportMonths(selectedMonth){
+  const base=/^\d{4}-\d{2}$/.test(selectedMonth||'') ? selectedMonth : localDateISO().slice(0,7);
+  const [year, month]=base.split('-').map(Number);
+  return Array.from({length:12},(_,index)=>{
+    const date=new Date(year,month-12+index,1);
+    return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}`;
+  });
+}
+function renderExpenseMonthlySummary(unitId, selectedMonth){
+  const box=el('expenseMonthSummary'); if(!box) return;
+  const months=expenseReportMonths(selectedMonth);
+  const reportUnits=unitId ? UNITS.filter(u=>u.id===unitId) : UNITS.filter(u=>u.status==='active');
+  const range=el('expenseSummaryRange');
+  if(range) range.textContent=`${formatFinanceMonth(months[0])} – ${formatFinanceMonth(months[months.length-1])}`;
+  const paidFor=(month, targetUnit)=>EXPENSES.filter(e=>e.status==='paid'&&e.expense_date&&e.expense_date.slice(0,7)===month&&(!targetUnit||e.org_unit_id===targetUnit)).reduce((sum,e)=>sum+Number(e.amount||0),0);
+  box.innerHTML=`<div class="expense-ledger-wrap"><table><thead><tr><th>Month</th>${reportUnits.map(u=>`<th class="amount">${esc(u.name)}</th>`).join('')}<th class="amount">Total</th></tr></thead><tbody>${months.map(month=>{
+    const values=reportUnits.map(u=>paidFor(month,u.id)); const total=values.reduce((sum,value)=>sum+value,0);
+    return `<tr><td><strong>${esc(formatFinanceMonth(month))}</strong></td>${values.map(value=>`<td class="amount">${value?rp(value):'—'}</td>`).join('')}<td class="amount"><strong>${total?rp(total):'—'}</strong></td></tr>`;
+  }).join('')}</tbody></table></div>`;
+}
 function renderExpenses(targetId='expensesTable', options={}){
   const box = el(targetId); if(!box) return;
-  const unitId = options.unitId || '';
-  const from = options.from || '', to = options.to || '';
+  const isLedger=targetId==='expensesTable';
+  if(isLedger) ensureExpenseLedgerFilters();
+  const selectedUnit=isLedger ? (el('expense_unit')?.value||'') : '';
+  const selectedMonth=isLedger ? (el('expense_month')?.value||'') : '';
+  const monthBounds=financeMonthBounds(selectedMonth);
+  const unitId = options.unitId || selectedUnit;
+  const from = options.from || monthBounds.from || '', to = options.to || monthBounds.to || '';
   const inRange = d => (!from || (d && d>=from)) && (!to || (d && d<=to));
   let sorted = EXPENSES.filter(x=>(!unitId||x.org_unit_id===unitId)&&inRange(x.expense_date)).sort((a,b)=>(b.expense_date||'').localeCompare(a.expense_date||''));
+  if(isLedger){
+    renderExpenseMonthlySummary(unitId, selectedMonth);
+    const status=el('expenses_status');
+    if(status) status.textContent=`Showing ${unitId?unitName(unitId):'All Units'} · ${selectedMonth?formatFinanceMonth(selectedMonth):'All time'}.`;
+    const count=el('expenseLedgerCount'); if(count) count.textContent=`${sorted.length} line item${sorted.length===1?'':'s'}`;
+  }
   if(options.limit) sorted=sorted.slice(0,options.limit);
   if(!sorted.length){ box.innerHTML='<div class="empty">No expenses recorded for this selection yet. Click "+ Record expense".</div>'; return; }
-  box.innerHTML = `<table><thead><tr><th>Date</th><th>Level / unit</th><th>Detail</th><th>Total</th><th>Status</th><th>Actions</th></tr></thead><tbody>${
+  box.innerHTML = `<table><thead><tr><th>Date</th><th>Level / unit</th><th>Detail</th><th class="amount">Total</th><th>Input by</th><th>Status</th><th>Actions</th></tr></thead><tbody>${
     sorted.map(x=>{
       let actions = ['draft','approved'].includes(x.status) ? `<button class="btn btn-ghost" onclick="openEditExpense('${x.id}')">Edit</button>` : '<span class="sub">—</span>';
       if(CURRENT_ROLE==='owner' && x.status==='draft') actions += ` <button class="btn btn-ghost" onclick="deleteDraftExpense('${x.id}')">Delete</button>`;
       if(CURRENT_ROLE==='owner' && x.status!=='void') actions += ` <button class="btn btn-ghost" onclick="voidExpense('${x.id}')">Void</button>`;
-      return `<tr><td class="sub">${esc(x.expense_date||'')}</td><td>${esc(unitName(x.org_unit_id))}</td><td>${esc(x.description||x.category||'—')}</td><td>${rp(x.amount)}</td><td>${expenseStatusBadge(x.status)}</td><td style="white-space:nowrap">${actions}</td></tr>`;
+      return `<tr><td class="sub">${esc(x.expense_date||'')}</td><td>${esc(unitName(x.org_unit_id))}</td><td>${esc(x.description||x.category||'—')}</td><td class="amount">${rp(x.amount)}</td><td class="entry-user">${esc(expenseInputterName(x.created_by))}</td><td>${expenseStatusBadge(x.status)}</td><td style="white-space:nowrap">${actions}</td></tr>`;
     }).join('')
   }</tbody></table>`;
 }
@@ -3281,3 +3352,4 @@ setTimeout(()=>{ if(el('login').style.display!=='none') pingConnection(); }, 300
 </script>
 </body>
 </html>
+
